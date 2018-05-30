@@ -16,7 +16,7 @@ source('./code/packages.R')
 sampled_pots <- read.csv('data/potSummary_QO16.csv') 
 fish_tkt <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
                       endRow = 53)
-
+crab_data <- read.csv('data/crabDatadump_QO16.csv') 
 
 # calcs ----
 # exploratory right now - edit and re-order at a later time
@@ -44,5 +44,26 @@ samp_pots %>%
          legalret_cpue = T_legalret/pots, legalNR_cpue = T_legalNR/pots) -> cpue_summary
 
 # total effort from fishery ---
-# this is stored in excel....see about extracted it from there
+# stored in excel and with calcs there so needs to be edited for each area for the rows included
+head(fish_tkt)
+# add effort to cpue summary
+merge(cpue_summary, sum(fish_tkt$Effort..sum.)) 
 
+cpue_summary %>% 
+  merge(sum(fish_tkt$Effort..sum.)) %>% 
+  rename(fishery_effort = y) ->summary1
+
+# catch number -------
+# extrapolated from cpue and total fishery effort 
+summary1 %>% 
+  mutate(female_catch = round(fishery_effort*female_cpue,0), 
+         sub_catch = round(fishery_effort*sub_cpue,0),
+         legalret_catch = round(fishery_effort*legalret_cpue,0),
+         legalNR_catch = round(fishery_effort*legalNR_cpue,0)
+         ) -> summary2
+
+# size comp, avg size and weight -----
+# crabDatadump_QO16.csv 
+
+
+         
