@@ -9,8 +9,10 @@
 source('./code/packages.R')
 
 # data -----
-# Data is from the Kodiak wikki - see e-mail from Ben Daly for right now (paste explaination in here at a later
-# time)
+# Data is from the Kodiak wikki - 
+# http://kodweb.fishgame.state.ak.us/
+#  The data is accessed via: Data Access – Shellfish – Biological Data – Crab Observer – Reports & Info
+# see e-mail from Ben Daly for right now (paste explaination in here at a later time)
 
 # just for QO16
 sampled_pots <- read.csv('data/potSummary_QO16.csv') 
@@ -63,14 +65,37 @@ summary1 %>%
          ) -> summary2
 
 # size comp, avg size and weight -----
-# crabDatadump_QO16.csv 
+# crabDatadump_QO16.csv   - sampling at sea NOT dockside
 crab_data %>% 
   group_by(size, legal, sex, shell) %>% 
   summarise(n = n()) -> by_size
-  
+
+by_size_
+
 by_size %>% 
+  filter(!is.na(shell)) %>% 
   group_by(sex) %>% 
   summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) -> by_sex
 # my total for males here does NOT match Ben's Item2 spreadsheet....females does match????
-# look into this **fix**
-         
+# look into this **fix**  
+# I believe this is due to including those without shell conditions, removed shell = NA
+
+# all crab by size and shell condition -----
+crab_data %>% 
+  group_by(size, shell) %>% 
+  summarise(n = n()) %>% 
+  spread(key = shell, value = n) -> all_size
+
+all_size %>% 
+  colSums(na.rm = T)
+
+# males by size and shell condition -----
+by_size %>% 
+  filter(sex == 1) -> males
+males %>% 
+  spread(key = shell, value = n) %>% 
+  as.data.frame -> males2
+
+males2 %>% 
+  colSums(na.rm = T)
+
