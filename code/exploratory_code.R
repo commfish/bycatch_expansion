@@ -72,13 +72,18 @@ crab_data %>%
 
 #write.csv(by_size, file = 'results/by_size_at_sea.csv')
 
+# Item 2 tabe 1 males and females weighted average -----------------
 by_size %>% 
-  filter(!is.na(shell)) %>% 
+  filter(!is.na(shell) & !is.na(size)) %>% 
   group_by(sex) %>% 
-  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) -> by_sex
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
+  as.data.frame -> by_sex
 # my total for males here does NOT match Ben's Item2 spreadsheet....females does match????
 # look into this **fix**  
 # I believe this is due to including those without shell conditions, removed shell = NA
+
+# Item 2 tab 2 legal retained/non-retained
+crab_data
 
 # all crab by size and shell condition -----
 crab_data %>% 
@@ -99,3 +104,4 @@ males %>%
 males2 %>% 
   colSums(na.rm = T)
 
+write.csv(males2, file = 'results/by_size_at_sea_males.csv')
