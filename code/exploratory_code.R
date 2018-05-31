@@ -70,7 +70,7 @@ crab_data %>%
   group_by(size, legal, sex, shell) %>% 
   summarise(n = n()) -> by_size
 
-by_size_
+#write.csv(by_size, file = 'results/by_size_at_sea.csv')
 
 by_size %>% 
   filter(!is.na(shell)) %>% 
