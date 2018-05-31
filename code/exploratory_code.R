@@ -64,6 +64,13 @@ summary1 %>%
 
 # size comp, avg size and weight -----
 # crabDatadump_QO16.csv 
-
-
+crab_data %>% 
+  group_by(size, legal, sex, shell) %>% 
+  summarise(n = n()) -> by_size
+  
+by_size %>% 
+  group_by(sex) %>% 
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) -> by_sex
+# my total for males here does NOT match Ben's Item2 spreadsheet....females does match????
+# look into this **fix**
          
