@@ -68,7 +68,8 @@ summary1 %>%
 # crabDatadump_QO16.csv   - sampling at sea NOT dockside
 crab_data %>% 
   group_by(size, legal, sex, shell) %>% 
-  summarise(n = n()) -> by_size
+  summarise(n = n()) %>% 
+  as.data.frame-> by_size
 
 #write.csv(by_size, file = 'results/by_size_at_sea.csv')
 
@@ -78,21 +79,23 @@ by_size %>%
   group_by(sex) %>% 
   summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
   as.data.frame -> by_sex
+# **save** need to save females wtg_avg and n here 
+
 # my total for males here does NOT match Ben's Item2 spreadsheet....females does match????
 # look into this **fix**  
 # I believe this is due to including those without shell conditions, removed shell = NA
 
 # Item 2 tab 2 legal retained/non-retained -------------
 crab_data %>% 
-  filter(sex == 1) %>% 
+  filter(sex == 1) 
   
+
 # Item 2 tab 3 legal / sublegal males ---------------------
 by_size %>% 
   filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
   group_by(legal) %>% 
-  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) 
-  
-  
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n))
+
 # all crab by size and shell condition -----
 crab_data %>% 
   group_by(size, shell) %>% 
