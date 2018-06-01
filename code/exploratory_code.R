@@ -35,10 +35,13 @@ length(unique(pots2$`Trip - spn`)) ->no_pots
 # count in pots ------
 # count for females, sublegal, legalret and legalNR # from potSummary
 sampled_pots %>% 
-  summarise(T_female = sum(Female), T_sublegal = sum(Sublegal), T_legalret = sum(LegalRet), 
-            T_legalNR = sum(LegalNR)) -> pot_summary
+  gather("component", "n", 16:19) -> sampled_pots2
 
-merge(no_pots, pot_summary) -> samp_pots
+sampled_pots2 %>% 
+  group_by(component) %>% 
+  summarise(number = sum(n)) -> pots_by
+
+merge(no_pots, pots_by) -> samp_pots
 samp_pots %>% 
   rename(pots = x) -> samp_pots
 samp_pots
