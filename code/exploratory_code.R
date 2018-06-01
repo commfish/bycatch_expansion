@@ -86,15 +86,22 @@ by_size %>%
 # I believe this is due to including those without shell conditions, removed shell = NA
 
 # Item 2 tab 2 legal retained/non-retained -------------
-crab_data %>% 
-  filter(sex == 1) 
-  
+by_size %>% 
+  filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
+  group_by(legal) %>% 
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
+  as.data.frame -> by_retained
+# **save** need to save legal 0, 1, 2 here - there are sublegal, legalRet, and legal NR and n's
 
 # Item 2 tab 3 legal / sublegal males ---------------------
 by_size %>% 
   filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
-  group_by(legal) %>% 
-  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n))
+  mutate(status = ifelse(legal == 0, 'sub', 
+                         ifelse(legal == 1, 'Leg', ifelse(legal == 2, 'Leg', legal)))) %>% 
+  group_by(status) %>% 
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
+  as.data.frame ->by_legal
+# **save** need to save sublegal and legal here -  and n's
 
 # all crab by size and shell condition -----
 crab_data %>% 
