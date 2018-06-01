@@ -82,9 +82,17 @@ by_size %>%
 # look into this **fix**  
 # I believe this is due to including those without shell conditions, removed shell = NA
 
-# Item 2 tab 2 legal retained/non-retained
-crab_data
-
+# Item 2 tab 2 legal retained/non-retained -------------
+crab_data %>% 
+  filter(sex == 1) %>% 
+  
+# Item 2 tab 3 legal / sublegal males ---------------------
+by_size %>% 
+  filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
+  group_by(legal) %>% 
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) 
+  
+  
 # all crab by size and shell condition -----
 crab_data %>% 
   group_by(size, shell) %>% 
