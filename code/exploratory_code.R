@@ -65,16 +65,16 @@ summary1 %>%
 
 # size comp, avg size and weight -----
 # crabDatadump_QO16.csv   - sampling at sea NOT dockside
-
-# total crab of each category sampled not just those that have recorded shell and size 
-crab
-
 crab_data %>% 
   group_by(size, legal, sex, shell) %>% 
   summarise(n = n()) %>% 
   as.data.frame-> by_size
 
 #write.csv(by_size, file = 'results/by_size_at_sea.csv')
+# total crab of each category sampled not just those that have recorded shell and size 
+by_size %>% 
+  group_by(sex, legal) %>% 
+  summarise(n = sum(n)) -> total_numbers_by_component
 
 # Item 2 tabe 1 males and females weighted average -----------------
 shell_cond <- c(1,2,3,4)
