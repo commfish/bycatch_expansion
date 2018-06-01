@@ -126,20 +126,22 @@ EBSsnow %>%
          avg_wt_kg = avg_wt/1000) -> EBSsnow
 EBSsnow %>% 
   left_join(samp_numbers_by_component) %>% 
-  select(-sex, -legal) ->EBSsnow
+  select(-sex, -legal) %>% 
+  mutate(fishery = "EBSsnow") ->EBSsnow
+write.csv(EBSsnow, file = 'results/EBSsnow_weight_length.csv')
 
 # add catch biomass to summary2 -----------
 head(summary2) # number here is total count in pots
 head(EBSsnow)
 summary2 %>% 
   left_join(EBSsnow) %>% 
-  select(component, number, pots, cpue, fishery_effort, catch_no, 
+  select(fishery, component, number, pots, cpue, fishery_effort, catch_no, 
          avg_wt_kg, n) -> EBSsnow_all
 
 EBSsnow_all %>% 
-  mutate(catch_biomass = catch_no*avg_wt_kg) %>% 
-  mutate(fishery = "EBSsnow") -> EBSsnow_all
+  mutate(catch_biomass = catch_no*avg_wt_kg) -> EBSsnow_all
 
+write.csv(EBSsnow_all, file = 'results/EBSsnowcrab.csv')
 
 # all crab by size and shell condition -----
 crab_data %>% 
@@ -160,4 +162,4 @@ males %>%
 males2 %>% 
   colSums(na.rm = T)
 
-write.csv(males2, file = 'results/by_size_at_sea_males.csv')
+#write.csv(males2, file = 'results/by_size_at_sea_males.csv')
