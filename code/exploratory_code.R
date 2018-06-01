@@ -61,11 +61,7 @@ cpue_summary %>%
 # catch number -------
 # extrapolated from cpue and total fishery effort 
 summary1 %>% 
-  mutate(female_catch = round(fishery_effort*female_cpue,0), 
-         sub_catch = round(fishery_effort*sub_cpue,0),
-         legalret_catch = round(fishery_effort*legalret_cpue,0),
-         legalNR_catch = round(fishery_effort*legalNR_cpue,0)
-         ) -> summary2
+  mutate(catch_no = round(cpue*fishery_effort,0)) -> summary2
 
 # size comp, avg size and weight -----
 # crabDatadump_QO16.csv   - sampling at sea NOT dockside
@@ -118,6 +114,16 @@ EBSsnow %>%
   mutate(avg_wt = alpha*(avg_size^(beta)), 
          avg_wt_kg = round(avg_wt/1000,3)) -> EBSsnow
 
+# add catch biomass to summary2 -----------
+head(summary2)
+head(EBSsnow)
+summary2 %>% 
+  left_join(EBSsnow) %>% 
+  select(component, number, pots, cpue, fishery_effort, catch_no, 
+         avg_wt_kg, n) -> EBSsnow2
+
+EBSsnow2 %>% 
+  mutate(catch_biomass = catch_no*avg_wt_kg)
 
 
 # all crab by size and shell condition -----
