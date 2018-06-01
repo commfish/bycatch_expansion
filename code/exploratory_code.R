@@ -65,6 +65,10 @@ summary1 %>%
 
 # size comp, avg size and weight -----
 # crabDatadump_QO16.csv   - sampling at sea NOT dockside
+
+# total crab of each category sampled not just those that have recorded shell and size 
+crab
+
 crab_data %>% 
   group_by(size, legal, sex, shell) %>% 
   summarise(n = n()) %>% 
@@ -73,8 +77,10 @@ crab_data %>%
 #write.csv(by_size, file = 'results/by_size_at_sea.csv')
 
 # Item 2 tabe 1 males and females weighted average -----------------
+shell_cond <- c(1,2,3,4)
 by_size %>% 
   filter(!is.na(shell) & !is.na(size)) %>% 
+  filter(shell %in% shell_cond) %>% 
   group_by(sex) %>% 
   summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
   as.data.frame -> by_sex
@@ -107,6 +113,7 @@ component <- c("Female", "Sublegal", "LegalRet", "LegalNR")
 EBSsnow <- data.frame(component)
 EBSsnow$avg_size <- round(c(by_sex[2,2], by_retained[1,2], by_retained[2,2], by_retained[3,2]),1)
 EBSsnow$n <- c(by_sex[2,3], by_retained[1,3], by_retained[2,3], by_retained[3,3])
+# n in BenD's file is total number not just those with shell and size...**fix**
 EBSsnow$alpha <- c(weight_length[11,2], weight_length[10,2], weight_length[10,2], weight_length[10,2])
 EBSsnow$beta <- c(weight_length[11,3], weight_length[10,3], weight_length[10,3], weight_length[10,3])
 
