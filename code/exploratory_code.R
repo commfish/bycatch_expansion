@@ -48,15 +48,12 @@ samp_pots
 
 # calculate CPUE from sampled pots -----------
 samp_pots %>% 
-  mutate(female_cpue = T_female/pots, sub_cpue = T_sublegal/pots, 
-         legalret_cpue = T_legalret/pots, legalNR_cpue = T_legalNR/pots) -> cpue_summary
+  mutate(cpue = number/pots) -> cpue_summary
 
 # total effort from fishery ---
 # stored in excel and with calcs there so needs to be edited for each area for the rows included
 head(fish_tkt)
 # add effort to cpue summary
-merge(cpue_summary, sum(fish_tkt$Effort..sum.)) 
-
 cpue_summary %>% 
   merge(sum(fish_tkt$Effort..sum.)) %>% 
   rename(fishery_effort = y) ->summary1
