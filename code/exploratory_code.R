@@ -19,6 +19,9 @@ sampled_pots <- read.csv('data/potSummary_QO16.csv')
 fish_tkt <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
                       endRow = 53)
 crab_data <- read.csv('data/crabDatadump_QO16.csv') 
+weight_length <- read.csv('data/weight_length.csv') #using these values and size results in average
+#                  weight in grams.   
+
 
 # calcs ----
 # exploratory right now - edit and re-order at a later time
@@ -102,6 +105,20 @@ by_size %>%
   summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
   as.data.frame ->by_legal
 # **save** need to save sublegal and legal here -  and n's
+
+# summary avg size and wt ---------------
+component <- c("Female", "Sublegal", "LegalRet", "LegalNR")
+EBSsnow <- data.frame(component)
+EBSsnow$avg_size <- round(c(by_sex[2,2], by_retained[1,2], by_retained[2,2], by_retained[3,2]),1)
+EBSsnow$n <- c(by_sex[2,3], by_retained[1,3], by_retained[2,3], by_retained[3,3])
+EBSsnow$alpha <- c(weight_length[11,2], weight_length[10,2], weight_length[10,2], weight_length[10,2])
+EBSsnow$beta <- c(weight_length[11,3], weight_length[10,3], weight_length[10,3], weight_length[10,3])
+
+EBSsnow %>% 
+  mutate(avg_wt = alpha*(avg_size^(beta)), 
+         avg_wt_kg = round(avg_wt/1000,3)) -> EBSsnow
+
+
 
 # all crab by size and shell condition -----
 crab_data %>% 
