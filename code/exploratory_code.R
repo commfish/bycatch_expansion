@@ -61,7 +61,7 @@ cpue_summary %>%
 # catch number -------
 # extrapolated from cpue and total fishery effort 
 summary1 %>% 
-  mutate(catch_no = round(cpue*fishery_effort,0)) -> summary2
+  mutate(catch_no = cpue*fishery_effort) -> summary2
 
 # size comp, avg size and weight -----
 # crabDatadump_QO16.csv   - sampling at sea NOT dockside
