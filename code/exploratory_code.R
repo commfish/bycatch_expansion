@@ -74,7 +74,11 @@ crab_data %>%
 # total crab of each category sampled not just those that have recorded shell and size 
 by_size %>% 
   group_by(sex, legal) %>% 
-  summarise(n = sum(n)) -> total_numbers_by_component
+  summarise(n = sum(n)) %>% 
+  mutate(component = ifelse(sex ==1 & legal ==0, "Sublegal", 
+                            ifelse(sex ==1 & legal ==1, "LegalRet", 
+                                   ifelse(sex ==1 & legal ==2, "LegalNR", 
+                                          ifelse(sex ==2, "Female", " ")))))-> samp_numbers_by_component
 
 # Item 2 tabe 1 males and females weighted average -----------------
 shell_cond <- c(1,2,3,4)
@@ -112,17 +116,20 @@ by_size %>%
 component <- c("Female", "Sublegal", "LegalRet", "LegalNR")
 EBSsnow <- data.frame(component)
 EBSsnow$avg_size <- round(c(by_sex[2,2], by_retained[1,2], by_retained[2,2], by_retained[3,2]),1)
-EBSsnow$n <- c(by_sex[2,3], by_retained[1,3], by_retained[2,3], by_retained[3,3])
+#EBSsnow$n <- c(by_sex[2,3], by_retained[1,3], by_retained[2,3], by_retained[3,3])
 # n in BenD's file is total number not just those with shell and size...**fix**
 EBSsnow$alpha <- c(weight_length[11,2], weight_length[10,2], weight_length[10,2], weight_length[10,2])
 EBSsnow$beta <- c(weight_length[11,3], weight_length[10,3], weight_length[10,3], weight_length[10,3])
 
 EBSsnow %>% 
   mutate(avg_wt = alpha*(avg_size^(beta)), 
-         avg_wt_kg = round(avg_wt/1000,3)) -> EBSsnow
+         avg_wt_kg = avg_wt/1000,3) -> EBSsnow
+EBSsnow %>% 
+  left_join(samp_numbers_by_component) %>% 
+  select(-sex, -legal) ->EBSsnow
 
 # add catch biomass to summary2 -----------
-head(summary2)
+head(summary2) # number here is total count in pots
 head(EBSsnow)
 summary2 %>% 
   left_join(EBSsnow) %>% 
