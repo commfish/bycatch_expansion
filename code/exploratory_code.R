@@ -123,7 +123,7 @@ EBSsnow$beta <- c(weight_length[11,3], weight_length[10,3], weight_length[10,3],
 
 EBSsnow %>% 
   mutate(avg_wt = alpha*(avg_size^(beta)), 
-         avg_wt_kg = avg_wt/1000,3) -> EBSsnow
+         avg_wt_kg = avg_wt/1000) -> EBSsnow
 EBSsnow %>% 
   left_join(samp_numbers_by_component) %>% 
   select(-sex, -legal) ->EBSsnow
@@ -134,10 +134,11 @@ head(EBSsnow)
 summary2 %>% 
   left_join(EBSsnow) %>% 
   select(component, number, pots, cpue, fishery_effort, catch_no, 
-         avg_wt_kg, n) -> EBSsnow2
+         avg_wt_kg, n) -> EBSsnow_all
 
-EBSsnow2 %>% 
-  mutate(catch_biomass = catch_no*avg_wt_kg)
+EBSsnow_all %>% 
+  mutate(catch_biomass = catch_no*avg_wt_kg) %>% 
+  mutate(fishery = "EBSsnow") -> EBSsnow_all
 
 
 # all crab by size and shell condition -----
