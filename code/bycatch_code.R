@@ -27,7 +27,9 @@ files_cdata <- dir('data/datadump', pattern = '*.csv')
 crab_data <- files_cdata %>% 
   map(function(x) read_csv(file.path('data/datadump', x))) %>% 
   reduce(rbind) 
-crab_data <- read.csv('data/crabDatadump_QO16.csv') 
+
 # Data on this relationship from NMFS tech memo July 2016 - Bob Foy
 weight_length <- read.csv('data/weight_length.csv') #using these values and size results in average
 #                  weight in grams.   
+
+
