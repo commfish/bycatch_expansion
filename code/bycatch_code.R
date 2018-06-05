@@ -55,15 +55,15 @@ numbers %>%
 
 # calculate CPUE from sampled pots -----------
 samp_pots %>% 
-  mutate(cpue = number/pots) -> cpue_summary
+  mutate(cpue = number/no_pots) -> samp_pots
 
 # total effort from fishery ---
 # stored in excel and with calcs there so needs to be edited for each area for the rows included
 head(fish_tkt)
-# add effort to cpue summary
-cpue_summary %>% 
+# add effort to sampled pots summary 
+samp_pots %>% 
   merge(sum(fish_tkt$Effort..sum.)) %>% 
-  rename(fishery_effort = y) ->summary1
+  rename(fishery_effort = y) -> summary1
 
 # catch number -------
 # extrapolated from cpue and total fishery effort 
