@@ -20,8 +20,17 @@ sampled_pots <- files_pots %>%
                   map(function(x) read_csv(file.path('data/pots', x))) %>% 
                   reduce(rbind) 
 # From Ben D, need to figure out where this comes from **fix**
-fish_tkt <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
+# each fishery has a tab here, read in all applicable fisheries
+fish_tkt1 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
                       endRow = 53)
+fish_tkt2 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QT17', startRow = 3, 
+                       endRow = 53) # edit start and end rows.
+fish_tkt3 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'TR17', startRow = 3, 
+                   endRow = 53) # edit start and end rows.
+
+fish_tkt1 %>% 
+  rbind(fish_tkt2) %>% 
+  rbind(fish_tkt3)
 # Data dumps - Crab Detail Data - Fishery: QO16 - Species: snow crab - Sex: all 
 files_cdata <- dir('data/datadump', pattern = '*.csv')
 crab_data <- files_cdata %>% 
@@ -63,9 +72,60 @@ head(fish_tkt)
 # add effort to sampled pots summary 
 samp_pots %>% 
   merge(sum(fish_tkt$Effort..sum.)) %>% 
-  rename(fishery_effort = y) -> summary1
+  rename(fishery_effort = y) -> summary1 # **fix** currently not correct, need fishery effort for other fisheries
+                                          # only QO16 here
 
 # catch number -------
 # extrapolated from cpue and total fishery effort 
 summary1 %>% 
-  mutate(catch_no = cpue*fishery_effort) -> summary2
+  mutate(catch_no = cpue*fishery_effort) -> summary1
+
+# size comp, avg size and weight ---------------------------
+# use crab_data here    - sampling at sea NOT dockside
+crab_data %>% 
+  group_by(fishery, size, legal, sex, shell) %>% 
+  summarise(n = n()) %>% 
+  as.data.frame-> by_size
+
+# total crab of each category sampled not just those that have recorded shell and size 
+component_list <- c("Female", "Sublegal", "LegalRet", "LegalNR")
+by_size %>% 
+  group_by(fishery, sex, legal) %>% 
+  summarise(n = sum(n)) %>% 
+  mutate(component = ifelse(sex ==1 & legal ==0, "Sublegal", 
+                            ifelse(sex ==1 & legal ==1, "LegalRet", 
+                                   ifelse(sex ==1 & legal ==2, "LegalNR", 
+                                          ifelse(sex ==2, "Female", " "))))) %>% 
+  filter(component %in% component_list) -> samp_numbers_by_component
+
+# Item 2 tabe 1 males and females weighted average -----------------
+shell_cond <- c(1,2,3,4)
+by_size %>% 
+  filter(!is.na(shell) & !is.na(size)) %>% 
+  filter(shell %in% shell_cond) %>% 
+  group_by(sex) %>% 
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
+  as.data.frame -> by_sex
+# **save** need to save females wtg_avg and n here 
+
+# my total for males here does NOT match Ben's Item2 spreadsheet....females does match????
+# look into this **fix**  
+# I believe this is due to including those without shell conditions, removed shell = NA
+
+# Item 2 tab 2 legal retained/non-retained -------------
+by_size %>% 
+  filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
+  group_by(legal) %>% 
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
+  as.data.frame -> by_retained
+# **save** need to save legal 0, 1, 2 here - there are sublegal, legalRet, and legal NR and n's
+
+# Item 2 tab 3 legal / sublegal males ---------------------
+by_size %>% 
+  filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
+  mutate(status = ifelse(legal == 0, 'sub', 
+                         ifelse(legal == 1, 'Leg', ifelse(legal == 2, 'Leg', legal)))) %>% 
+  group_by(status) %>% 
+  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
+  as.data.frame ->by_legal
+# **save** need to save sublegal and legal here -  and n's
