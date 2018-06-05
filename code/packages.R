@@ -13,6 +13,8 @@ library(grid)
 library(knitr)
 library(pander)
 library(data.table)
+library(readr)
+library(purrr)
 options(scipen=9999) # remove scientific notation
 
 loadfonts(device="win")
