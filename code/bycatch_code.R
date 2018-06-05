@@ -32,4 +32,40 @@ crab_data <- files_cdata %>%
 weight_length <- read.csv('data/weight_length.csv') #using these values and size results in average
 #                  weight in grams.   
 
+# summary stats  ----------
+# number of pots sampled ------
+sampled_pots %>% 
+  unite(Trip-spn, Trip, Spn, sep ="-") -> pots2
 
+pots2 %>% 
+  group_by(Fishery) %>% 
+  summarise(no_pots = length(unique(`Trip - spn`))) -> pots
+
+# count in pots ------
+# count for females, sublegal, legalret and legalNR # from potSummary
+sampled_pots %>% 
+  gather("component", "n", 16:19) -> sampled_pots2
+
+sampled_pots2 %>% 
+  group_by(Fishery, component) %>% 
+  summarise(number = sum(n)) -> numbers
+
+numbers %>% 
+  left_join(pots) -> samp_pots
+
+# calculate CPUE from sampled pots -----------
+samp_pots %>% 
+  mutate(cpue = number/pots) -> cpue_summary
+
+# total effort from fishery ---
+# stored in excel and with calcs there so needs to be edited for each area for the rows included
+head(fish_tkt)
+# add effort to cpue summary
+cpue_summary %>% 
+  merge(sum(fish_tkt$Effort..sum.)) %>% 
+  rename(fishery_effort = y) ->summary1
+
+# catch number -------
+# extrapolated from cpue and total fishery effort 
+summary1 %>% 
+  mutate(catch_no = cpue*fishery_effort) -> summary2
