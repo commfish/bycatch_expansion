@@ -85,17 +85,17 @@ summary1 %>%
 crab_data %>% 
   group_by(fishery, size, legal, sex, shell) %>% 
   summarise(n = n()) %>% 
+  mutate(component = ifelse(sex ==1 & legal ==0, "Sublegal", 
+                            ifelse(sex ==1 & legal ==1, "LegalRet", 
+                                   ifelse(sex ==1 & legal ==2, "LegalNR", 
+                                          ifelse(sex ==2, "Female", " "))))) %>% 
   as.data.frame-> by_size
 
 # total crab of each category sampled not just those that have recorded shell and size 
 component_list <- c("Female", "Sublegal", "LegalRet", "LegalNR")
 by_size %>% 
-  group_by(fishery, sex, legal) %>% 
+  group_by(fishery, component) %>% 
   summarise(n = sum(n)) %>% 
-  mutate(component = ifelse(sex ==1 & legal ==0, "Sublegal", 
-                            ifelse(sex ==1 & legal ==1, "LegalRet", 
-                                   ifelse(sex ==1 & legal ==2, "LegalNR", 
-                                          ifelse(sex ==2, "Female", " "))))) %>% 
   filter(component %in% component_list) -> samp_numbers_by_component
 
 # Item 2 tabe 1 males and females weighted average -----------------
