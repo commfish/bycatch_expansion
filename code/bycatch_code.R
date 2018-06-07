@@ -103,29 +103,13 @@ shell_cond <- c(1,2,3,4)
 by_size %>% 
   filter(!is.na(shell) & !is.na(size)) %>% 
   filter(shell %in% shell_cond) %>% 
-  group_by(sex) %>% 
+  group_by(fishery, component) %>% 
   summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
   as.data.frame -> by_sex
-# **save** need to save females wtg_avg and n here 
-
+# 
 # my total for males here does NOT match Ben's Item2 spreadsheet....females does match????
-# look into this **fix**  
-# I believe this is due to including those without shell conditions, removed shell = NA
+# look into this - I believe this is due to including those without shell conditions, removed shell = NA
+# use totals from samp_numbers_by_component - they include all individuals sampled. 
 
-# Item 2 tab 2 legal retained/non-retained -------------
-by_size %>% 
-  filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
-  group_by(legal) %>% 
-  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
-  as.data.frame -> by_retained
-# **save** need to save legal 0, 1, 2 here - there are sublegal, legalRet, and legal NR and n's
 
-# Item 2 tab 3 legal / sublegal males ---------------------
-by_size %>% 
-  filter(sex == 1 & !is.na(shell) & !is.na(size)) %>% 
-  mutate(status = ifelse(legal == 0, 'sub', 
-                         ifelse(legal == 1, 'Leg', ifelse(legal == 2, 'Leg', legal)))) %>% 
-  group_by(status) %>% 
-  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
-  as.data.frame ->by_legal
-# **save** need to save sublegal and legal here -  and n's
+
