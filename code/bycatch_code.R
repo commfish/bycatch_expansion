@@ -21,7 +21,7 @@ sampled_pots <- files_pots %>%
                   reduce(rbind) 
 # From Ben D, need to figure out where this comes from **fix**
 # each fishery has a tab here, read in all applicable fisheries
-fish_tkt1 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
+fish_tkt <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
                       endRow = 53)
 fish_tkt2 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QT17', startRow = 3, 
                        endRow = 53) # edit start and end rows.
