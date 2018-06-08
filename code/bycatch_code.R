@@ -120,9 +120,12 @@ by_component %>%
   left_join(weight_length) %>% 
   select(-Species) -> by_component2
 
-EBSsnow %>% 
+
+by_component2 %>% 
+  filter(component %in% component_list) %>% 
   mutate(avg_wt = alpha*(avg_size^(beta)), 
          avg_wt_kg = avg_wt/1000) -> EBSsnow
+
 EBSsnow %>% 
   left_join(samp_numbers_by_component) %>% 
   select(-sex, -legal) %>% 
