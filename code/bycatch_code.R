@@ -104,12 +104,46 @@ by_size %>%
   filter(!is.na(shell) & !is.na(size)) %>% 
   filter(shell %in% shell_cond) %>% 
   group_by(fishery, component) %>% 
-  summarise(wtg_avg = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
+  summarise(avg_size = weighted.mean(size, n, na.rm = T), n = sum(n)) %>% 
   as.data.frame -> by_sex
 # 
 # my total for males here does NOT match Ben's Item2 spreadsheet....females does match????
 # look into this - I believe this is due to including those without shell conditions, removed shell = NA
 # use totals from samp_numbers_by_component - they include all individuals sampled. 
 
+# summary avg size and wt ---------------
+by_sex %>% 
+  
 
+
+
+component <- c("Female", "Sublegal", "LegalRet", "LegalNR")
+EBSsnow <- data.frame(component)
+EBSsnow$avg_size <- round(c(by_sex[2,2], by_retained[1,2], by_retained[2,2], by_retained[3,2]),1)
+#EBSsnow$n <- c(by_sex[2,3], by_retained[1,3], by_retained[2,3], by_retained[3,3])
+# n in BenD's file is total number not just those with shell and size...**fix**
+EBSsnow$alpha <- c(weight_length[11,2], weight_length[10,2], weight_length[10,2], weight_length[10,2])
+EBSsnow$beta <- c(weight_length[11,3], weight_length[10,3], weight_length[10,3], weight_length[10,3])
+
+EBSsnow %>% 
+  mutate(avg_wt = alpha*(avg_size^(beta)), 
+         avg_wt_kg = avg_wt/1000) -> EBSsnow
+EBSsnow %>% 
+  left_join(samp_numbers_by_component) %>% 
+  select(-sex, -legal) %>% 
+  mutate(fishery = "EBSsnow") ->EBSsnow
+write.csv(EBSsnow, file = 'results/EBSsnow_weight_length.csv')
+
+# add catch biomass to summary2 -----------
+head(summary2) # number here is total count in pots
+head(EBSsnow)
+summary2 %>% 
+  left_join(EBSsnow) %>% 
+  select(fishery, component, number, pots, cpue, fishery_effort, catch_no, 
+         avg_wt_kg, n) -> EBSsnow_all
+
+EBSsnow_all %>% 
+  mutate(catch_biomass = catch_no*avg_wt_kg) -> EBSsnow_all
+
+write.csv(EBSsnow_all, file = 'results/EBSsnowcrab.csv')
 
