@@ -123,14 +123,15 @@ by_component %>%
 
 by_component2 %>% 
   filter(component %in% component_list) %>% 
+  rename(fishery = Fishery) %>% 
   mutate(avg_wt = alpha*(avg_size^(beta)), 
          avg_wt_kg = avg_wt/1000) -> EBSsnow
 
 EBSsnow %>% 
+  select(-n) %>% 
   left_join(samp_numbers_by_component) %>% 
-  select(-sex, -legal) %>% 
-  mutate(fishery = "EBSsnow") ->EBSsnow
-write.csv(EBSsnow, file = 'results/EBSsnow_weight_length.csv')
+  mutate(species = "EBSsnow") ->EBSsnow
+write.csv(EBSsnow, file = 'results/EBSsnow_weight_length_all_fisheries.csv')
 
 # add catch biomass to summary2 -----------
 head(summary2) # number here is total count in pots
