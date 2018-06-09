@@ -129,20 +129,18 @@ by_component2 %>%
 
 EBSsnow %>% 
   select(-n) %>% 
-  left_join(samp_numbers_by_component) %>% 
-  mutate(species = "EBSsnow") ->EBSsnow
+  left_join(samp_numbers_by_component) ->EBSsnow
 write.csv(EBSsnow, file = 'results/EBSsnow_weight_length_all_fisheries.csv')
 
-# add catch biomass to summary2 -----------
-head(summary2) # number here is total count in pots
+# add catch biomass to summary1 -----------
+head(summary1) # number here is total count in pots
 head(EBSsnow)
-summary2 %>% 
+summary1 %>% 
+  rename(fishery = Fishery) %>%
   left_join(EBSsnow) %>% 
-  select(fishery, component, number, pots, cpue, fishery_effort, catch_no, 
-         avg_wt_kg, n) -> EBSsnow_all
+  select(fishery, component, number, no_pots, cpue, fishery_effort, catch_no, avg_size, 
+         avg_wt_kg, n) %>% 
+  mutate(catch_biomass = catch_no*avg_wt_kg)-> EBSsnow_all
 
-EBSsnow_all %>% 
-  mutate(catch_biomass = catch_no*avg_wt_kg) -> EBSsnow_all
-
-write.csv(EBSsnow_all, file = 'results/EBSsnowcrab.csv')
+write.csv(EBSsnow_all, file = 'results/EBSsnowcrab_allfisheries.csv')
 
