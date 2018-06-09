@@ -141,6 +141,7 @@ summary1 %>%
   select(fishery, component, number, no_pots, cpue, fishery_effort, catch_no, avg_size, 
          avg_wt_kg, n) %>% 
   mutate(catch_biomass = catch_no*avg_wt_kg)-> EBSsnow_all
+# **fix** what to do about component / fishery sections that don't have length or weight data
 
 write.csv(EBSsnow_all, file = 'results/EBSsnowcrab_allfisheries.csv')
 
