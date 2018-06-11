@@ -146,3 +146,21 @@ summary1 %>%
 
 write.csv(EBSsnow_all, file = 'results/EBSsnowcrab_allfisheries.csv')
 
+## side question ----
+# calculate average weight by applying the weight-length relationship and then averaging weight...how different is this?
+
+head(by_size)
+head(weight_length)
+
+by_size %>% 
+  mutate(Fishery = fishery) %>% 
+  separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") -> by_size2
+
+by_size2 %>% 
+  left_join(weight_length) %>% 
+  select(-Species, -legal, -sex, -shell) %>% 
+  mutate(wt_gram = alpha*(size^(beta))) %>% 
+  group_by(Fishery, component) %>% 
+  summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), n = sum(n) ) %>% 
+  mutate(avg_wt_kg = avg_wt_g/1000) %>% 
+  as.data.frame -> avg_weight
