@@ -142,6 +142,7 @@ summary1 %>%
          avg_wt_kg, n) %>% 
   mutate(catch_biomass = catch_no*avg_wt_kg)-> EBSsnow_all
 # **fix** what to do about component / fishery sections that don't have length or weight data
+# **update** need to update with fishery_effort data for the other fisheries...right now all are QO16..
 
 write.csv(EBSsnow_all, file = 'results/EBSsnowcrab_allfisheries.csv')
 
