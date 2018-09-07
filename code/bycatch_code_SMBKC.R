@@ -137,34 +137,25 @@ by_size %>%
 # look into this - I believe this is due to including those without shell conditions, removed shell = NA
 # use totals from samp_numbers_by_component - they include all individuals sampled. 
 
-# summary avg size and wt ---------------
+# summary avg wt ---------------
+# calculate average weight by applying the weight-length relationship and then averaging weight...how different is this?
+
 by_size %>% 
-  separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") -> by_size2
+  separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") %>% 
+  mutate(year = as.numeric(year) +2000) -> by_size2
 
 by_size2 %>% 
   left_join(weight_length) %>% 
   select(-Species, -legal, -sex, -shell) %>% 
   mutate(wt_gram = alpha*(size^(beta))) %>% 
-  group_by(Fishery, component) %>% 
+  group_by(fishery_code, year, component) %>% 
   summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), n = sum(n) ) %>% 
   mutate(avg_wt_kg = avg_wt_g/1000) %>% 
   as.data.frame -> avg_weight
 
 
-by_sex %>% 
-  mutate(Fishery = fishery) %>% 
-  separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") ->by_component
-
-by_component %>% 
-  left_join(weight_length) %>% 
-  select(-Species) -> by_component2
-
-
-by_component2 %>% 
-  filter(component %in% component_list) %>% 
-  rename(fishery = Fishery) %>% 
-  mutate(avg_wt = alpha*(avg_size^(beta)), 
-         avg_wt_kg = avg_wt/1000) -> EBSsnow
+# wt and numbers -----------
+avg_weight %>% 
 
 EBSsnow %>% 
   select(-n) %>% 
@@ -185,21 +176,4 @@ summary1 %>%
 
 write.csv(EBSsnow_all, file = 'results/EBSsnowcrab_allfisheries.csv')
 
-## side question ----
-# calculate average weight by applying the weight-length relationship and then averaging weight...how different is this?
 
-head(by_size)
-head(weight_length)
-
-by_size %>% 
-  mutate(Fishery = fishery) %>% 
-  separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") -> by_size2
-
-by_size2 %>% 
-  left_join(weight_length) %>% 
-  select(-Species, -legal, -sex, -shell) %>% 
-  mutate(wt_gram = alpha*(size^(beta))) %>% 
-  group_by(Fishery, component) %>% 
-  summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), n = sum(n) ) %>% 
-  mutate(avg_wt_kg = avg_wt_g/1000) %>% 
-  as.data.frame -> avg_weight
