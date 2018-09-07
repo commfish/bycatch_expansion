@@ -144,21 +144,23 @@ by_size %>%
   separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") %>% 
   mutate(year = as.numeric(year) +2000) -> by_size2
 
+Males = c("Sublegal", "LegalRet", "LegalNR")
 by_size2 %>% 
   left_join(weight_length) %>% 
   select(-Species, -legal, -sex, -shell) %>% 
-  mutate(wt_gram = alpha*(size^(beta))) %>% 
-  group_by(fishery_code, year, component) %>% 
-  summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), n = sum(n) ) %>% 
-  mutate(avg_wt_kg = avg_wt_g/1000) %>% 
+  mutate(wt_gram = alpha*(size^(beta)), 
+         wt_kg = wt_gram/1000, 
+         wt_lb = wt_kg*2.20462262, 
+         component2 = ifelse(component %in% Males, "Male", "Female")) %>% 
+  group_by(fishery_code, year, component2) %>% 
+  summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), 
+            avg_wt_lb = weighted.mean(wt_lb, n, na.rm = T), n = sum(n) ) %>% 
   as.data.frame -> avg_weight
-
-
 
 # add catch biomass to summary1 -----------
 head(summary1) # number here is total count in pots
 # need this by males and females
-Males = c("Sublegal", "LegalRet", "LegalNR")
+
 summary1 %>% 
   mutate(component2 = ifelse(component %in% Males, "Male", "Female")) %>% 
   group_by(Fishery, year, species, fishery, Fishery_directed_effort, no_pots,component2) %>% 
