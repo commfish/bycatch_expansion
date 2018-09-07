@@ -144,10 +144,16 @@ by_size %>%
   separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") %>% 
   mutate(year = as.numeric(year) +2000) -> by_size2
 
+weight_length %>% 
+  filter(Species == "st matthew bkc") %>% 
+  ungroup() %>% 
+  select(-Species, -fishery_code) -> wl_smbkc_only
+
 Males = c("Sublegal", "LegalRet", "LegalNR")
 by_size2 %>% 
-  left_join(weight_length) %>% 
-  select(-Species, -legal, -sex, -shell) %>% 
+  left_join(wl_smbkc_only) %>% # here I always want to use the relationship for SMBKC regardless
+                            # of the directed fishery
+  select(-legal, -sex, -shell) %>% 
   mutate(wt_gram = alpha*(size^(beta)), 
          wt_kg = wt_gram/1000, 
          wt_lb = wt_kg*2.20462262, 
@@ -185,9 +191,15 @@ write.csv(SMBKC_all, file = 'resultsSMBKC_allfisheries.csv')
 SMBKC_all %>% 
   ungroup() %>%
   select(-Fishery, -fishery_code) %>% 
-  filter(species == "SMBKC") %>% 
-  as.data.frame()
+  group_by(species, year) %>% 
+  summarise(total_catch_biomass = sum(catch_biomass, na.rm = TRUE)) 
+  
+  
+head(landed_lb)
+landed_lb %>% 
+  group_by(Season) %>% 
+  summarise(landed_pounds = sum(Whole.Weight..sum., na.rm = TRUE))
 
 
-
-
+# data check
+SMBKC_all %>% filter(species == "snow" & component2 == "Male") %>% as.data.frame()
