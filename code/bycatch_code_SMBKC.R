@@ -154,17 +154,21 @@ by_size2 %>%
   as.data.frame -> avg_weight
 
 
-# wt and numbers -----------
-avg_weight %>% 
-
-EBSsnow %>% 
-  select(-n) %>% 
-  left_join(samp_numbers_by_component) ->EBSsnow
-write.csv(EBSsnow, file = 'results/EBSsnow_weight_length_all_fisheries.csv')
 
 # add catch biomass to summary1 -----------
 head(summary1) # number here is total count in pots
-head(EBSsnow)
+# need this by males and females
+Males = c("Sublegal", "LegalRet", "LegalNR")
+summary1 %>% 
+  mutate(component2 = ifelse(component %in% Males, "Male", "Female")) %>% 
+  group_by(Fishery, year, species, fishery, Fishery_directed_effort, no_pots,component2) %>% 
+  summarise(number = sum(number)) %>% 
+  mutate(cpue = number/no_pots) -> summary2
+
+# need this by males and females
+head(avg_weight)
+
+
 summary1 %>% 
   rename(fishery = Fishery) %>%
   left_join(EBSsnow) %>% 
