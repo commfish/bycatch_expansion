@@ -185,19 +185,27 @@ summary2 %>%
   mutate(catch_biomass = catch_no*avg_wt_lb)-> SMBKC_all
 # **fix** what to do about component / fishery sections that don't have length or weight data
 
-write.csv(SMBKC_all, file = 'resultsSMBKC_allfisheries.csv')
+write.csv(SMBKC_all, file = 'results/SMBKC_allfisheries.csv')
 
 ## summarize for excel output comparison ------
 SMBKC_all %>% 
   ungroup() %>%
   select(-Fishery, -fishery_code) %>% 
   group_by(species, year) %>% 
-  summarise(total_catch_biomass = sum(catch_biomass, na.rm = TRUE)) #matches Ben D.'s!!
+  summarise(total_catch_biomass = sum(catch_biomass, na.rm = TRUE)) -> SMBKC_all_total #matches Ben D.'s!!
   
   
 head(landed_lb)
 landed_lb %>% 
   group_by(Season) %>% 
-  summarise(landed_pounds = sum(Whole.Weight..sum., na.rm = TRUE))
+  summarise(landed_pounds = sum(Whole.Weight..sum., na.rm = TRUE)) %>% 
+  mutate(year = as.numeric(str_sub(Season, 1, 4)), species = "SMBKC")-> smbkc_landed_lb
 
+SMBKC_all_total %>% 
+  left_join(smbkc_landed_lb) %>% 
+  select(-Season) %>% 
+  mutate(landed_pounds = replace_na(landed_pounds, 0), 
+         total_bycatch_lb = total_catch_biomass - landed_pounds, 
+         total_bycatch_mort_lb = total_bycatch_lb*0.2) %>% 
+  write.csv(file = 'results/SMBKC_total.csv')
 
