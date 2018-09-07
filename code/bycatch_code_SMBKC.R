@@ -19,32 +19,39 @@ source('./code/packages.R')
 # This is for one species - SMBKC St.Matts Blue King Crab. 
 #  Look at all open fishery in that year  - here need 2010 to 2018. Should only show up in 
 #                                             snow, tanner, and directed fisheries/
-# Species Composition Reports - Sample pot summary - Fishery: QO16/ - Species: snow crab
-files_pots <- dir('data/pots', pattern = '*.csv')
+# Species Composition Reports - Sample pot summary - Fishery: QO16/ - Species: SM blue king crab
+files_pots <- dir('data/SMBKC/potsum', pattern = '*.csv')
 sampled_pots <- files_pots %>% 
-                  map(function(x) read_csv(file.path('data/pots', x))) %>% 
+                  map(function(x) read_csv(file.path('data/SMBKC/potsum', x))) %>% 
                   reduce(rbind) 
 # From Ben D, need to figure out where this comes from **fix**
 # each fishery has a tab here, read in all applicable fisheries
-fish_tkt <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
-                      endRow = 53)
-fish_tkt2 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QT17', startRow = 3, 
-                       endRow = 53) # edit start and end rows.
-fish_tkt3 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'TR17', startRow = 3, 
-                   endRow = 53) # edit start and end rows.
+#fish_tkt <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
+#                      endRow = 53)
+#fish_tkt2 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QT17', startRow = 3, 
+#                       endRow = 53) # edit start and end rows.
+#fish_tkt3 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'TR17', startRow = 3, 
+#                   endRow = 53) # edit start and end rows.
 
-fish_tkt1 %>% 
-  rbind(fish_tkt2) %>% 
-  rbind(fish_tkt3)
+#fish_tkt1 %>% 
+#  rbind(fish_tkt2) %>% 
+#  rbind(fish_tkt3)
 # Data dumps - Crab Detail Data - Fishery: QO16 - Species: snow crab - Sex: all 
-files_cdata <- dir('data/datadump', pattern = '*.csv')
+files_cdata <- dir('data/SMBKC/datadump', pattern = '*.csv')
 crab_data <- files_cdata %>% 
-  map(function(x) read_csv(file.path('data/datadump', x))) %>% 
+  map(function(x) read_csv(file.path('data/SMBKC/datadump', x))) %>% 
   reduce(rbind) 
 
 # Data on this relationship from NMFS tech memo July 2016 - Bob Foy
 weight_length <- read.csv('data/weight_length.csv') #using these values and size results in average
 #                  weight in grams.   
+
+# landed pounds in directed fishery SMBKC QP
+landed_lb <- read.xlsx("data/SMBKC/FT summary SMBKC Multiple Seasons By Stat Area With CDQ-.xlsx", 
+                       sheetName = 'Sheet1', startRow = 3, endRow = 55)
+## Fishery directed effort - Ben D. summarizes this from WBT Directed-Incidental Calculations_17-18.xlsx
+fishery_effort <- read.xlsx("data/SMBKC/SMBKC_bycatch_ests.xlsx", 
+                       sheetName = 'Sheet1')
 
 # summary stats  ----------
 # number of pots sampled ------
@@ -58,7 +65,7 @@ pots2 %>%
 # count in pots ------
 # count for females, sublegal, legalret and legalNR # from potSummary
 sampled_pots %>% 
-  gather("component", "n", 16:19) -> sampled_pots2
+  gather("component", "n", Female:LegalNR) -> sampled_pots2
 
 sampled_pots2 %>% 
   group_by(Fishery, component) %>% 
@@ -70,20 +77,34 @@ numbers %>%
 # calculate CPUE from sampled pots -----------
 samp_pots %>% 
   mutate(cpue = number/no_pots) -> samp_pots
+# pull year out from fishery designation
+library(stringr)
+numextract <- function(string){ 
+  str_sub(string, 3, 4)
+} 
+chrextract <- function(string){ 
+  str_sub(string, 1, 2)
+}
+samp_pots %>% 
+  mutate(year = as.numeric(numextract(Fishery)) + 2000, 
+         fishery = chrextract(Fishery), 
+         species = ifelse(fishery == "QO", "snow", 
+                    ifelse(fishery == "QT", "TannerW", 
+                     ifelse(fishery == "QP", "SMBKC")))) -> samp_pots
 
 # total effort from fishery ---
 # stored in excel and with calcs there so needs to be edited for each area for the rows included
-head(fish_tkt)
+head(fishery_effort)
+fishery_effort %>% 
+  select(year = Year, species = Fishery, Fishery_directed_effort) %>% 
+  right_join(samp_pots) -> summary1
 # add effort to sampled pots summary 
-samp_pots %>% 
-  merge(sum(fish_tkt$Effort..sum.)) %>% 
-  rename(fishery_effort = y) -> summary1 # **fix** currently not correct, need fishery effort for other fisheries
-                                          # only QO16 here
+
 
 # catch number -------
 # extrapolated from cpue and total fishery effort 
 summary1 %>% 
-  mutate(catch_no = cpue*fishery_effort) -> summary1
+  mutate(catch_no = cpue*Fishery_directed_effort) -> summary1
 
 # size comp, avg size and weight ---------------------------
 # use crab_data here    - sampling at sea NOT dockside
@@ -117,6 +138,19 @@ by_size %>%
 # use totals from samp_numbers_by_component - they include all individuals sampled. 
 
 # summary avg size and wt ---------------
+by_size %>% 
+  separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") -> by_size2
+
+by_size2 %>% 
+  left_join(weight_length) %>% 
+  select(-Species, -legal, -sex, -shell) %>% 
+  mutate(wt_gram = alpha*(size^(beta))) %>% 
+  group_by(Fishery, component) %>% 
+  summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), n = sum(n) ) %>% 
+  mutate(avg_wt_kg = avg_wt_g/1000) %>% 
+  as.data.frame -> avg_weight
+
+
 by_sex %>% 
   mutate(Fishery = fishery) %>% 
   separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") ->by_component
