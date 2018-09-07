@@ -165,21 +165,29 @@ summary1 %>%
   mutate(component2 = ifelse(component %in% Males, "Male", "Female")) %>% 
   group_by(Fishery, year, species, fishery, Fishery_directed_effort, no_pots,component2) %>% 
   summarise(number = sum(number)) %>% 
-  mutate(cpue = number/no_pots) -> summary2
+  mutate(cpue = number/no_pots, 
+         catch_no = cpue*Fishery_directed_effort) -> summary2
 
 # need this by males and females
 head(avg_weight)
 
-
-summary1 %>% 
-  rename(fishery = Fishery) %>%
-  left_join(EBSsnow) %>% 
-  select(fishery, component, number, no_pots, cpue, fishery_effort, catch_no, avg_size, 
-         avg_wt_kg, n) %>% 
-  mutate(catch_biomass = catch_no*avg_wt_kg)-> EBSsnow_all
+summary2 %>% 
+  rename(fishery_code = fishery) %>%
+  left_join(avg_weight) %>% 
+  select(year, species, Fishery, Fishery_directed_effort, no_pots, 
+         component2, number, cpue, catch_no, avg_wt_lb) %>% 
+  mutate(catch_biomass = catch_no*avg_wt_lb)-> SMBKC_all
 # **fix** what to do about component / fishery sections that don't have length or weight data
-# **update** need to update with fishery_effort data for the other fisheries...right now all are QO16..
 
-write.csv(EBSsnow_all, file = 'results/EBSsnowcrab_allfisheries.csv')
+write.csv(SMBKC_all, file = 'resultsSMBKC_allfisheries.csv')
+
+## summarize for excel output comparison ------
+SMBKC_all %>% 
+  ungroup() %>%
+  select(-Fishery, -fishery_code) %>% 
+  filter(species == "SMBKC") %>% 
+  as.data.frame()
+
+
 
 
