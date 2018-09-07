@@ -192,7 +192,7 @@ SMBKC_all %>%
   ungroup() %>%
   select(-Fishery, -fishery_code) %>% 
   group_by(species, year) %>% 
-  summarise(total_catch_biomass = sum(catch_biomass, na.rm = TRUE)) 
+  summarise(total_catch_biomass = sum(catch_biomass, na.rm = TRUE)) #matches Ben D.'s!!
   
   
 head(landed_lb)
@@ -201,5 +201,3 @@ landed_lb %>%
   summarise(landed_pounds = sum(Whole.Weight..sum., na.rm = TRUE))
 
 
-# data check
-SMBKC_all %>% filter(species == "snow" & component2 == "Male") %>% as.data.frame()
