@@ -67,9 +67,6 @@ sampled_pots2 %>%
 numbers %>% 
   left_join(pots) -> samp_pots
 
-# calculate CPUE from sampled pots -----------
-samp_pots %>% 
-  mutate(cpue = number/no_pots) -> samp_pots
 # pull year out from fishery designation
 library(stringr)
 numextract <- function(string){ 
@@ -79,11 +76,23 @@ chrextract <- function(string){
   str_sub(string, 1, 2)
 }
 samp_pots %>% 
-  mutate(year = as.numeric(numextract(Fishery)) + 2000, 
+  mutate(year = as.numeric(numextract(Fishery)), 
          fishery = chrextract(Fishery), 
-         species = ifelse(fishery == "QO", "snow", 
-                          ifelse(fishery == "QT", "TannerW", 
-                                 ifelse(fishery == "QP", "SMBKC")))) -> samp_pots
+         species = ifelse(fishery == "CR", "red king", 
+                          ifelse(fishery == "TR", "red king", 
+                                 ifelse(fishery == "XR", "CR red king")))) -> samp_pots
+samp_pots %>% 
+  mutate(year = ifelse(year > 25, year + 1900, year + 2000)) -> samp_pots
+
+### group directed red crab together (TR and CR)
+samp_pots %>% 
+  group_by(year, species, component) %>% 
+  summarise(number = sum(number), no_pots = sum(no_pots)) -> samp_pots
+  
+
+# calculate CPUE from sampled pots -----------
+samp_pots %>% 
+  mutate(cpue = number/no_pots) -> samp_pots
 
 # total effort from fishery ---
 # stored in excel and with calcs there so needs to be edited for each area for the rows included
