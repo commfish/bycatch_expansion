@@ -98,7 +98,10 @@ samp_pots %>%
 # stored in excel and with calcs there so needs to be edited for each area for the rows included
 head(fishery_effort)
 fishery_effort %>% 
-  select(year = Year, species = Fishery, Fishery_directed_effort) %>% 
+  select(year, dir_fishery_effort, CR_fishery_effort) %>%
+  gather("type", "direct_effort", dir_fishery_effort:CR_fishery_effort) %>% 
+  mutate(species = ifelse(type == "dir_fishery_effort", "red king", "CR red king")) %>% 
+  select(-type) %>% 
   right_join(samp_pots) -> summary1
 # add effort to sampled pots summary 
 
@@ -106,7 +109,7 @@ fishery_effort %>%
 # catch number -------
 # extrapolated from cpue and total fishery effort 
 summary1 %>% 
-  mutate(catch_no = cpue*Fishery_directed_effort) -> summary1
+  mutate(catch_no = cpue*direct_effort) -> summary1
 
 # size comp, avg size and weight ---------------------------
 # use crab_data here    - sampling at sea NOT dockside
