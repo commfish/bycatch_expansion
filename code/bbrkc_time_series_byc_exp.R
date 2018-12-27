@@ -17,17 +17,20 @@ source('./code/packages.R')
 # Fish ticket data is from Ben Daly - need to ask him where this is stored.
 
 # This is for one species - BBRKC - Bristol Bay Red King crab 
-#  Normall need to look at all open fisheries in each year. Here there was a data dump provided for all years.
+#  Normally need to look at all open fisheries in each year. Here there was a data dump provided for all years.
 
-# BEN didn't send me this for BBRKC...do I need it ? **FIX**
+##### BEN sent me a summary of sampled obsever pots ONLY for directed and cost recovery... why ?? **FIX**
 # Species Composition Reports - Sample pot summary - Fishery: all fisheries/ - Species: BBRKC
 
-# sampled_pots <- read.csv('data/time_series/bbrkc/RKC_crab_dump_921_3.csv')
+# Species Composition Reports - Sample pot summary - Fishery: TR or CR or XR/ - Species: red king crab
+files_pots <- dir('data/time_series/bbrkc/samp_pots', pattern = '*.csv')
+sampled_pots <- files_pots %>% 
+  map(function(x) read_csv(file.path('data/time_series/bbrkc/samp_pots', x))) %>% 
+  reduce(rbind) 
 
 # From Ben D, need to figure out where this comes from **fix**
 fish_tkt <- read.csv('data/time_series/bbrkc/FT_numcrab_landed.csv')
 # total landings and effort in directed fishery - bbrkc??? check with Ben
-
 
 # Data dumps - Crab Detail Data - Fishery: all - Species: bbrkc - Sex: all 
 crab_data <-  read.csv('data/time_series/bbrkc/RKC_crab_dump_921_3.csv')
@@ -39,7 +42,9 @@ weight_length <- read.csv('data/weight_length.csv') #using these values and size
 #                  weight in grams.   
 
 ## landed pounds in directed fishery bbrkc TR -  see fish_tkt above.
-## Fishery directed effort - see fish_tkt above.
+## Fishery directed effort and observed effort - summarized by Ben.
+fishery_effort <- read.xlsx("data/time_series/bbrkc/Jie_BBRKC_data_request_MarchApril2018_pre96included.xlsx", 
+                            sheetName = 'effort')
 
 # summary stats  ----------
 # number of pots sampled ------
