@@ -111,6 +111,19 @@ fishery_effort %>%
 summary1 %>% 
   mutate(catch_no = cpue*direct_effort) -> summary1
 
+### 2016 check -----
+# see discard estimates4.xlsx 
+summary1 %>% filter(year == 2016) %>% 
+  group_by(component) %>% 
+  summarise(fish_effort = sum(direct_effort), 
+            number = sum(number), 
+            obs_effort = sum(no_pots)) %>% 
+  filter(component == "LegalNR" | component == "LegalRet") %>% 
+  group_by(fish_effort, obs_effort) %>% 
+  summarise(legal_no = sum(number)) %>% 
+  mutate(expand_legal_no = legal_no/obs_effort * fish_effort)
+# not the same as Bill's....???? **FIX**
+
 # size comp, avg size and weight ---------------------------
 # use crab_data here    - sampling at sea NOT dockside
 crab_data %>% 
