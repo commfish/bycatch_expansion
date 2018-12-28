@@ -124,6 +124,48 @@ summary1 %>% filter(year == 2016) %>%
   mutate(expand_legal_no = legal_no/obs_effort * fish_effort)
 # not the same as Bill's....???? **FIX**
 
+### legal NR (numbers) from data and subtraction --------------------
+# uses numbers NOT weight 
+head(summary1)
+# summarise catch_no by year
+summary1 %>% 
+  filter(year > 1989) %>% 
+  group_by(year, component) %>% 
+  summarise(fish_effort = sum(direct_effort), 
+            number = sum(number), 
+            obs_effort = sum(no_pots)) %>% 
+  mutate(expand_no = (number/obs_effort)*fish_effort) -> summary1_annual
+fish_tkt %>% 
+  select(year, numcrab_landed, wt_landed_lbs) -> bbrkc_fish_tkt_sum
+
+summary1_annual %>% 
+  left_join(bbrkc_fish_tkt_sum) -> summary1_annual_catch
+
+### Legal NR percent ----------
+summary1_annual_catch %>% 
+  mutate(percent = expand_no/numcrab_landed) %>% 
+  filter(component == "LegalNR") -> percent_LegNR_no
+
+### Substraction method ----------
+summary1_annual_catch %>% 
+  mutate(component2 = ifelse(component == "LegalNR", "Legal", 
+                             ifelse(component == "LegalRet", "Legal", component))) %>% 
+  group_by(year, component2, fish_effort, obs_effort, numcrab_landed, wt_landed_lbs) %>% 
+  summarise(number = sum(number)) %>% 
+  mutate(expand_no = (number/obs_effort)*fish_effort,  
+         percent_sub = (expand_no-numcrab_landed)/expand_no) %>% 
+  filter(component2 == "Legal") -> percent_LegNR_subtraction_no
+
+
+# comparison of two methods with numbers ----------
+percent_LegNR_no %>% 
+  select(year, percent) %>% 
+  right_join(percent_LegNR_subtraction_no) %>% 
+  select(year, percent, percent_sub) %>% 
+  gather("method", "percentage", percent:percent_sub) %>% 
+  ggplot(aes(year, percentage, fill = method)) +
+    geom_bar(stat = "identity", position = position_dodge())
+
 # size comp, avg size and weight ---------------------------
 # use crab_data here    - sampling at sea NOT dockside
 crab_data %>% 
