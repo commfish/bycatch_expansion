@@ -155,7 +155,19 @@ summary1_annual_catch %>%
   mutate(expand_no = (number/obs_effort)*fish_effort,  
          percent_sub = (expand_no-numcrab_landed)/expand_no) %>% 
   filter(component2 == "Legal") -> percent_LegNR_subtraction_no
+percent_LegNR_subtraction_no %>% 
+  ungroup() %>% 
+  select(-component2) -> merge_no
 
+#### file for numbers -----
+percent_LegNR_no %>% 
+  ungroup() %>% 
+  select(-component, -number, -expand_no) %>% 
+  right_join(merge_no) %>% 
+  write.csv(file = 'results/bbrkc/bbrkc_numbers.csv')
+
+# percent is from data collected as LegalNR and percent_sub is from subtraction method using Legals in observed
+#   pots expaned and the numcrab_landed
 
 # comparison of two methods with numbers ----------
 percent_LegNR_no %>% 
