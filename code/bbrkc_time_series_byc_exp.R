@@ -231,41 +231,57 @@ weight_length %>%
 
 Males = c("Sublegal", "LegalRet", "LegalNR")
 by_size2 %>% 
-  left_join(wl_smbkc_only) %>% # here I always want to use the relationship for SMBKC regardless
-  # of the directed fishery
+  left_join(wl_bbrkc_only) %>% # here I always want to use the relationship for bbrkc regardless of fishery
+   # of the directed fishery
   select(-legal, -sex, -shell) %>% 
+  filter(component != " ") %>% 
   mutate(wt_gram = alpha*(size^(beta)), 
          wt_kg = wt_gram/1000, 
          wt_lb = wt_kg*2.20462262, 
          component2 = ifelse(component %in% Males, "Male", "Female")) %>% 
-  group_by(fishery_code, year, component2) %>% 
+  group_by(year, species, component2) %>% 
   summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), 
             avg_wt_lb = weighted.mean(wt_lb, n, na.rm = T), n = sum(n) ) %>% 
-  as.data.frame -> avg_weight
+  ungroup() %>% 
+  select(-species) %>% 
+  as.data.frame -> avg_weight  ## !!!!fix!!!! this is by male or female since components are not adequately 
+#                                                   sampled in each year
 
 # add catch biomass to summary1 -----------
-head(summary1) # number here is total count in pots
-# need this by males and females
+head(summary1_annual_catch) # number here is total count in pots by component
+# and includes catch data 
 
-summary1 %>% 
-  mutate(component2 = ifelse(component %in% Males, "Male", "Female")) %>% 
-  group_by(Fishery, year, species, fishery, Fishery_directed_effort, no_pots,component2) %>% 
-  summarise(number = sum(number)) %>% 
-  mutate(cpue = number/no_pots, 
-         catch_no = cpue*Fishery_directed_effort) -> summary2
+summary1_annual_catch %>% 
+  mutate(component2 = ifelse(component %in% Males, "Male", "Female"), 
+         obs_cpue = number/obs_effort, 
+         fish_cpue = numcrab_landed/fish_effort) -> summary2
 
-# need this by males and females
+# need this components -- eventually just focus on legalNR and then just legal in general
 head(avg_weight)
 
+### adding weight by male or female ----------
 summary2 %>% 
-  rename(fishery_code = fishery) %>%
   left_join(avg_weight) %>% 
-  select(year, species, Fishery, Fishery_directed_effort, no_pots, 
-         component2, number, cpue, catch_no, avg_wt_lb) %>% 
-  mutate(catch_biomass = catch_no*avg_wt_lb)-> SMBKC_all
+  select(-avg_wt_g) %>% 
+  mutate(expand_biomass = expand_no*avg_wt_lb)-> bbrkc_wt_1
+  
 # **fix** what to do about component / fishery sections that don't have length or weight data
 
-write.csv(SMBKC_all, file = 'results/SMBKC_allfisheries.csv')
+### LegalNR weight ----------
+
+
+
+
+### subtraction weight -------
+
+
+
+
+#write.csv(SMBKC_all, file = 'results/SMBKC_allfisheries.csv')
+
+
+
+
 
 ## summarize for excel output comparison ------
 SMBKC_all %>% 
