@@ -230,6 +230,7 @@ weight_length %>%
   select(-Species, -fishery_code, -description) -> wl_bbrkc_only
 
 Males = c("Sublegal", "LegalRet", "LegalNR")
+Legal = c("")
 by_size2 %>% 
   left_join(wl_bbrkc_only) %>% # here I always want to use the relationship for bbrkc regardless of fishery
    # of the directed fishery
@@ -246,6 +247,7 @@ by_size2 %>%
   select(-species) %>% 
   as.data.frame -> avg_weight  ## !!!!fix!!!! this is by male or female since components are not adequately 
 #                                                   sampled in each year
+# I need LEGAL males here!
 
 # add catch biomass to summary1 -----------
 head(summary1_annual_catch) # number here is total count in pots by component
@@ -268,11 +270,38 @@ summary2 %>%
 # **fix** what to do about component / fishery sections that don't have length or weight data
 
 ### LegalNR weight ----------
-
-
-
+bbrkc_wt_1 %>% 
+  mutate(percent = expand_biomass/wt_landed_lbs) %>% 
+  filter(component == "LegalNR") -> percent_LegNR_lb # data input for weights is missing 16 and 17
 
 ### subtraction weight -------
+bbrkc_wt_1 %>% 
+  mutate(component3 = ifelse(component == "LegalNR", "Legal", 
+                             ifelse(component == "LegalRet", "Legal", component))) %>% 
+  group_by(year, component3, fish_effort, obs_effort, numcrab_landed, wt_landed_lbs, avg_wt_lb) %>% 
+  summarise(number = sum(number)) %>% 
+  mutate(expand_lb = ((number/obs_effort)*fish_effort)*avg_wt_lb,  
+         percent_sub = (expand_lb-wt_landed_lbs)/expand_lb) %>% 
+  filter(component3 == "Legal") -> percent_LegNR_subtraction_lb
+
+
+percent_LegNR_subtraction_no %>% 
+  ungroup() %>% 
+  select(-component2) -> merge_no
+
+#### file for numbers -----
+percent_LegNR_no %>% 
+  ungroup() %>% 
+  select(-component, -number, -expand_no) %>% 
+  right_join(merge_no) %>% 
+  write.csv(file = 'results/bbrkc/bbrkc_numbers.csv')
+
+# percent is from data collected as LegalNR and percent_sub is from subtraction method using Legals in observed
+#   pots expaned and the numcrab_landed
+
+
+
+
 
 
 
