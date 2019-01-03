@@ -213,13 +213,21 @@ by_size %>%
 # calculate average weight by applying the weight-length relationship and then averaging weight...how different is this?
 
 by_size %>% 
-  separate(fishery, into = c("fishery_code", "year"), sep = "(?<=[A-Z a-z])(?=[0-9])") %>% 
-  mutate(year = as.numeric(year) +2000) -> by_size2
+  mutate(year = as.numeric(numextract(fishery)), 
+         fishery = chrextract(fishery), 
+         species = ifelse(fishery == "CR", "red king", 
+                               ifelse(fishery == "TR", "red king", 
+                               ifelse(fishery == "XR", "CR red king", "not"))), 
+         year = ifelse(year > 25, year + 1900, year + 2000)) -> by_size2
+# remove non directed bbkrc fisheries
+by_size2 %>% 
+  filter(species != "not") -> by_size2
 
+## weight conversion -------------
 weight_length %>% 
-  filter(Species == "st matthew bkc") %>% 
+  filter(Species == "red king") %>% 
   ungroup() %>% 
-  select(-Species, -fishery_code) -> wl_smbkc_only
+  select(-Species, -fishery_code, -description) -> wl_bbrkc_only
 
 Males = c("Sublegal", "LegalRet", "LegalNR")
 by_size2 %>% 
