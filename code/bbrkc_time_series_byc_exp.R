@@ -230,7 +230,7 @@ weight_length %>%
   select(-Species, -fishery_code, -description) -> wl_bbrkc_only
 
 Males = c("Sublegal", "LegalRet", "LegalNR")
-Legal = c("")
+Legal = c("LegalRet", "LegalNR")
 by_size2 %>% 
   left_join(wl_bbrkc_only) %>% # here I always want to use the relationship for bbrkc regardless of fishery
    # of the directed fishery
@@ -239,7 +239,8 @@ by_size2 %>%
   mutate(wt_gram = alpha*(size^(beta)), 
          wt_kg = wt_gram/1000, 
          wt_lb = wt_kg*2.20462262, 
-         component2 = ifelse(component %in% Males, "Male", "Female")) %>% 
+         component2 = ifelse(component %in% Legal, "Legal",
+                             ifelse(component == "Sublegal", "Male", "Female"))) %>% 
   group_by(year, species, component2) %>% 
   summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), 
             avg_wt_lb = weighted.mean(wt_lb, n, na.rm = T), n = sum(n) ) %>% 
@@ -254,7 +255,8 @@ head(summary1_annual_catch) # number here is total count in pots by component
 # and includes catch data 
 
 summary1_annual_catch %>% 
-  mutate(component2 = ifelse(component %in% Males, "Male", "Female"), 
+  mutate(component2 = ifelse(component %in% Legal, "Legal",
+                             ifelse(component == "Sublegal", "Male", "Female")), 
          obs_cpue = number/obs_effort, 
          fish_cpue = numcrab_landed/fish_effort) -> summary2
 
@@ -265,36 +267,36 @@ head(avg_weight)
 summary2 %>% 
   left_join(avg_weight) %>% 
   select(-avg_wt_g) %>% 
-  mutate(expand_biomass = expand_no*avg_wt_lb)-> bbrkc_wt_1
+  mutate(NRexpand_biomass = expand_no*avg_wt_lb)-> bbrkc_wt_1
   
 # **fix** what to do about component / fishery sections that don't have length or weight data
 
 ### LegalNR weight ----------
 bbrkc_wt_1 %>% 
-  mutate(percent = expand_biomass/wt_landed_lbs) %>% 
+  mutate(percent = NRexpand_biomass/wt_landed_lbs) %>% 
   filter(component == "LegalNR") -> percent_LegNR_lb # data input for weights is missing 16 and 17
 
 ### subtraction weight -------
 bbrkc_wt_1 %>% 
-  mutate(component3 = ifelse(component == "LegalNR", "Legal", 
-                             ifelse(component == "LegalRet", "Legal", component))) %>% 
-  group_by(year, component3, fish_effort, obs_effort, numcrab_landed, wt_landed_lbs, avg_wt_lb) %>% 
+  group_by(year, component2, fish_effort, obs_effort, numcrab_landed, wt_landed_lbs, avg_wt_lb) %>% 
   summarise(number = sum(number)) %>% 
-  mutate(expand_lb = ((number/obs_effort)*fish_effort)*avg_wt_lb,  
+  mutate(obs_cpue = number/obs_effort, 
+         fish_cpue = numcrab_landed/fish_effort,
+         expand_lb = ((number/obs_effort)*fish_effort)*avg_wt_lb,  
          percent_sub = (expand_lb-wt_landed_lbs)/expand_lb) %>% 
-  filter(component3 == "Legal") -> percent_LegNR_subtraction_lb
+  filter(component2 == "Legal") -> percent_LegNR_subtraction_lb
 
 
-percent_LegNR_subtraction_no %>% 
+#### file for weight-- lbs -----
+percent_LegNR_subtraction_lb %>% 
   ungroup() %>% 
-  select(-component2) -> merge_no
+  select(year, percent_sub, avg_wt_lb, obs_cpue, fish_cpue, expand_lb) -> merge_lb
 
-#### file for numbers -----
-percent_LegNR_no %>% 
+percent_LegNR_lb %>% 
   ungroup() %>% 
-  select(-component, -number, -expand_no) %>% 
-  right_join(merge_no) %>% 
-  write.csv(file = 'results/bbrkc/bbrkc_numbers.csv')
+  select(year, fish_effort, obs_effort, numcrab_landed, wt_landed_lbs, NRexpand_biomass, percent) %>% 
+  left_join(merge_lb) %>% 
+  write.csv(file = 'results/bbrkc/bbrkc_weights.csv')
 
 # percent is from data collected as LegalNR and percent_sub is from subtraction method using Legals in observed
 #   pots expaned and the numcrab_landed
