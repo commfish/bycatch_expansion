@@ -185,7 +185,7 @@ percent_LegNR_no %>%
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_y_continuous(name = "Percentage of Legal discards", breaks = seq(-60, 100, 20)) +
     scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
-    ggsave('./results/bbrkc/discard_numbers.png', dpi = 300, width = 8.0, 
+    ggsave('./results/bbrkc/discard_numbers.png', dpi = 300, width = 11.0, 
            height = 4.0, unit = "in")
 
 # size comp, avg size and weight ---------------------------
@@ -328,7 +328,7 @@ percent_LegNR_lb %>%
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_y_continuous(name = "Percentage of Legal discards", breaks = seq(-60, 100, 20)) +
   scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
-  ggsave('./results/bbrkc/discard_pounds.png', dpi = 300, width = 8.0, 
+  ggsave('./results/bbrkc/discard_pounds.png', dpi = 300, width = 11.0, 
          height = 4.0, unit = "in")
 
 
@@ -336,6 +336,19 @@ percent_LegNR_lb %>%
 percent_LegNR_subtraction_lb %>% 
   select(year, obs_cpue, fish_cpue) %>% 
   gather("source", "CPUE", obs_cpue:fish_cpue) %>% 
-  ggplot(aes(year, CPUE, fill = source, width = 0.5)) +
+  ggplot(aes(year, CPUE, fill = source, width = 0.4)) +
   geom_bar(stat = "identity", position = position_dodge()) +
-  scale_fill_grey() 
+  scale_fill_grey() +
+  scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
+  ggtitle("Raw CPUE of fishery and observed pots") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ggsave('./results/bbrkc/raw_cpue_compare.png', dpi = 300, width = 11.0, 
+         height = 4.0, unit = "in")
+
+
+percent_LegNR_subtraction_lb %>% 
+  select(year, obs_cpue, fish_cpue) %>% 
+  gather("source", "CPUE", obs_cpue:fish_cpue) %>% 
+  ggplot(aes(year, CPUE, group = source, shape = source)) +
+   geom_point(size = 3, fill = ("white")) +
+   scale_shape_manual(values = c(22, 21))
