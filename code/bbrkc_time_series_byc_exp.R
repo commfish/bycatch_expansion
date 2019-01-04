@@ -251,11 +251,11 @@ by_size2 %>%
          wt_lb = wt_kg*2.20462262, 
          component2 = ifelse(component %in% Legal, "Legal",
                              ifelse(component == "Sublegal", "Male", "Female"))) %>% 
-  group_by(year, species, component2) %>% 
+  ungroup() %>% 
+  group_by(year, component2) %>% 
   summarise(avg_wt_g = weighted.mean(wt_gram, n, na.rm = T), 
             avg_wt_lb = weighted.mean(wt_lb, n, na.rm = T), n = sum(n) ) %>% 
   ungroup() %>% 
-  select(-species) %>% 
   as.data.frame -> avg_weight  ## !!!!fix!!!! this is by male or female since components are not adequately 
 #                                                   sampled in each year
 # I need LEGAL males here!
@@ -330,35 +330,3 @@ percent_LegNR_lb %>%
   scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
   ggsave('./results/bbrkc/discard_pounds.png', dpi = 300, width = 8.0, 
          height = 4.0, unit = "in")
-
-
-
-
-
-#write.csv(SMBKC_all, file = 'results/SMBKC_allfisheries.csv')
-
-
-
-
-
-## summarize for excel output comparison ------
-SMBKC_all %>% 
-  ungroup() %>%
-  select(-Fishery, -fishery_code) %>% 
-  group_by(species, year) %>% 
-  summarise(total_catch_biomass = sum(catch_biomass, na.rm = TRUE)) -> SMBKC_all_total #matches Ben D.'s!!
-
-
-head(landed_lb)
-landed_lb %>% 
-  group_by(Season) %>% 
-  summarise(landed_pounds = sum(Whole.Weight..sum., na.rm = TRUE)) %>% 
-  mutate(year = as.numeric(str_sub(Season, 1, 4)), species = "SMBKC")-> smbkc_landed_lb
-
-SMBKC_all_total %>% 
-  left_join(smbkc_landed_lb) %>% 
-  select(-Season) %>% 
-  mutate(landed_pounds = replace_na(landed_pounds, 0), 
-         total_bycatch_lb = total_catch_biomass - landed_pounds, 
-         total_bycatch_mort_lb = total_bycatch_lb*0.2) %>% 
-  write.csv(file = 'results/SMBKC_total.csv')
