@@ -181,7 +181,7 @@ percent_LegNR_no %>%
     scale_fill_grey() +
     geom_text(aes(label = round(percentage, digits = 1)), vjust = -0.6, 
               position = position_dodge(0.9), size = 2.5) +
-    ggtitle("Percentage of Legal discards in numbers") +
+    ggtitle("BBRKC (directed only) Percentage of Legal discards in numbers") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_y_continuous(name = "Percentage of Legal discards", breaks = seq(-60, 100, 20)) +
     scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
@@ -324,7 +324,7 @@ percent_LegNR_lb %>%
   scale_fill_grey() +
   geom_text(aes(label = round(percentage, digits = 1)), vjust = -0.6, 
             position = position_dodge(0.9), size = 2.5) +
-  ggtitle("Percentage of Legal discards in biomass (lb)") +
+  ggtitle("BBRKC (directed only) Percentage of Legal discards in biomass (lb)") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_y_continuous(name = "Percentage of Legal discards", breaks = seq(-60, 100, 20)) +
   scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
@@ -332,7 +332,7 @@ percent_LegNR_lb %>%
          height = 4.0, unit = "in")
 
 
-# GRAPH fish cpue vs obs cpue
+# GRAPH fish cpue vs obs cpue ------------
 percent_LegNR_subtraction_lb %>% 
   select(year, obs_cpue, fish_cpue) %>% 
   gather("source", "CPUE", obs_cpue:fish_cpue) %>% 
@@ -340,7 +340,7 @@ percent_LegNR_subtraction_lb %>%
   geom_bar(stat = "identity", position = position_dodge()) +
   scale_fill_grey() +
   scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
-  ggtitle("Raw CPUE of fishery and observed pots") +
+  ggtitle("BBRKC Raw CPUE of fishery and observed pots") +
   theme(plot.title = element_text(hjust = 0.5)) +
   ggsave('./results/bbrkc/raw_cpue_compare.png', dpi = 300, width = 11.0, 
          height = 4.0, unit = "in")
