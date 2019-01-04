@@ -169,14 +169,24 @@ percent_LegNR_no %>%
 # percent is from data collected as LegalNR and percent_sub is from subtraction method using Legals in observed
 #   pots expaned and the numcrab_landed
 
-# comparison of two methods with numbers ----------
+# GRAPH numbers ----------
 percent_LegNR_no %>% 
   select(year, percent) %>% 
   right_join(percent_LegNR_subtraction_no) %>% 
   select(year, percent, percent_sub) %>% 
-  gather("method", "percentage", percent:percent_sub) %>% 
-  ggplot(aes(year, percentage, fill = method)) +
-    geom_bar(stat = "identity", position = position_dodge())
+  mutate(LegalNR = percent*100, Subtraction = percent_sub*100) %>% 
+  gather("method", "percentage", LegalNR:Subtraction) %>% 
+  ggplot(aes(year, percentage, fill = method, width = 0.5)) +
+    geom_bar(stat = "identity", position = position_dodge()) +
+    scale_fill_grey() +
+    geom_text(aes(label = round(percentage, digits = 1)), vjust = -0.6, 
+              position = position_dodge(0.9), size = 2.5) +
+    ggtitle("Percentage of Legal discards in numbers") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    scale_y_continuous(name = "Percentage of Legal discards", breaks = seq(-60, 100, 20)) +
+    scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
+    ggsave('./results/bbrkc/discard_numbers.png', dpi = 300, width = 8.0, 
+           height = 4.0, unit = "in")
 
 # size comp, avg size and weight ---------------------------
 # use crab_data here    - sampling at sea NOT dockside
@@ -302,7 +312,24 @@ percent_LegNR_lb %>%
 #   pots expaned and the numcrab_landed
 
 
-
+# GRAPH pounds weight ----------
+percent_LegNR_lb %>% 
+  select(year, percent) %>% 
+  right_join(percent_LegNR_subtraction_lb) %>% 
+  select(year, percent, percent_sub) %>% 
+  mutate(LegalNR = percent*100, Subtraction = percent_sub*100) %>% 
+  gather("method", "percentage", LegalNR:Subtraction) %>% 
+  ggplot(aes(year, percentage, fill = method, width = 0.5)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  scale_fill_grey() +
+  geom_text(aes(label = round(percentage, digits = 1)), vjust = -0.6, 
+            position = position_dodge(0.9), size = 3.5) +
+  ggtitle("Percentage of Legal discards in biomass (lb)") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_y_continuous(name = "Percentage of Legal discards", breaks = seq(-60, 100, 20)) +
+  scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
+  ggsave('./results/bbrkc/discard_pounds.png', dpi = 300, width = 8.0, 
+         height = 4.0, unit = "in")
 
 
 
