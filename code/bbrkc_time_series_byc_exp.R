@@ -323,10 +323,19 @@ percent_LegNR_lb %>%
   geom_bar(stat = "identity", position = position_dodge()) +
   scale_fill_grey() +
   geom_text(aes(label = round(percentage, digits = 1)), vjust = -0.6, 
-            position = position_dodge(0.9), size = 3.5) +
+            position = position_dodge(0.9), size = 2.5) +
   ggtitle("Percentage of Legal discards in biomass (lb)") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_y_continuous(name = "Percentage of Legal discards", breaks = seq(-60, 100, 20)) +
   scale_x_continuous(name = "Year", breaks = seq(1990, 2018, 2)) +
   ggsave('./results/bbrkc/discard_pounds.png', dpi = 300, width = 8.0, 
          height = 4.0, unit = "in")
+
+
+# GRAPH fish cpue vs obs cpue
+percent_LegNR_subtraction_lb %>% 
+  select(year, obs_cpue, fish_cpue) %>% 
+  gather("source", "CPUE", obs_cpue:fish_cpue) %>% 
+  ggplot(aes(year, CPUE, fill = source, width = 0.5)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  scale_fill_grey() 
