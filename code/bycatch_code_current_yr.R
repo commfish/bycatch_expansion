@@ -6,7 +6,6 @@
 # katie.palof@alaska.gov
 # 2018-09-06
 
-# test2 33
 
 # load ---
 source('./code/packages.R')
@@ -14,11 +13,12 @@ source('./code/packages.R')
 # data -----
 # Data is from the Kodiak wikki - http://kodweb.fishgame.state.ak.us/
 # The data is accessed via: Data Access – Shellfish – Biological Data – Crab Observer – 
-  #                                                                             Reports & Info
-# Fish ticket data is from Ben Daly - need to ask him where this is stored.
+  #                                    Reports & Info - 
+#    
+#  Fish ticket data is from Ben Daly - need to ask him where this is stored.
 
-# This is for one species - SMBKC St.Matts Blue King Crab. 
-#  Look at all open fishery in that year  - here need 2010 to 2018. Should only show up in 
+#  This is for one species - SMBKC St.Matts Blue King Crab. 
+#  Look at all open fishery in that year  - here current year 2018. Should only show up in 
 #                                             snow, tanner, and directed fisheries/
 # Species Composition Reports - Sample pot summary - Fishery: QO16/ - Species: SM blue king crab
 files_pots <- dir('data/SMBKC/potsum', pattern = '*.csv')
