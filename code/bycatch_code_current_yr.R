@@ -10,6 +10,8 @@
 # load ---
 source('./code/packages.R')
 
+cur_yr <- 2018
+stock <- 'smbkc'
 # data -----
 # Data is from the Kodiak wikki - http://kodweb.fishgame.state.ak.us/
 # The data is accessed via: Data Access – Shellfish – Biological Data – Crab Observer – 
@@ -21,9 +23,10 @@ source('./code/packages.R')
 #  Look at all open fishery in that year  - here current year 2018. Should only show up in 
 #                                             snow, tanner, and directed fisheries/
 # Species Composition Reports - Sample pot summary - Fishery: QO16/ - Species: SM blue king crab
-files_pots <- dir('data/SMBKC/potsum', pattern = '*.csv')
+#         Fishery will change - look at all those in current year but species will always be the same - species of interest
+files_pots <- dir(paste0('data/', cur_yr, '/', stock,'/potsum'), pattern = '*.csv')
 sampled_pots <- files_pots %>% 
-                  map(function(x) read_csv(file.path('data/SMBKC/potsum', x))) %>% 
+                  map(function(x) read_csv(file.path(paste0('data/', cur_yr, '/', stock,'/potsum'), x))) %>% 
                   reduce(rbind) 
 # From Ben D, need to figure out where this comes from **fix**
 # each fishery has a tab here, read in all applicable fisheries
@@ -38,9 +41,9 @@ sampled_pots <- files_pots %>%
 #  rbind(fish_tkt2) %>% 
 #  rbind(fish_tkt3)
 # Data dumps - Crab Detail Data - Fishery: QO16 - Species: snow crab - Sex: all 
-files_cdata <- dir('data/SMBKC/datadump', pattern = '*.csv')
+files_cdata <- dir(paste0('data/', cur_yr, '/', stock,'/potsum'), pattern = '*.csv')
 crab_data <- files_cdata %>% 
-  map(function(x) read_csv(file.path('data/SMBKC/datadump', x))) %>% 
+  map(function(x) read_csv(file.path(paste0('data/', cur_yr, '/', stock,'/potsum'), x))) %>% 
   reduce(rbind) 
 
 # Data on this relationship from NMFS tech memo July 2016 - Bob Foy
