@@ -1,45 +1,41 @@
-# SMBKC bycatch from 2010 to current year - calculated by request for plan team in Sept. 2018
+# Current year bycatch caluclations - ONLY for current year
 # work with Ben Daly on this request.
 # Work to automate bycatch expansion currently performed for BSAI crab fisheries
 
+# Currently set up for smbkc but should be transferable to other stocks
+
 # K.Palof    ADF&G 
 # katie.palof@alaska.gov
-# 2018-09-06
+# 2019-6-10
 
 
 # load ---
 source('./code/packages.R')
 
-cur_yr <- 2018
-stock <- 'smbkc'
+cur_yr <- 2018   #needs to be changed if year changes
+stock <- 'smbkc' #change with each stock of interest - stock of interest is the stock that is being caught or bycatch occured
+
 # data -----
 # Data is from the Kodiak wikki - http://kodweb.fishgame.state.ak.us/
 # The data is accessed via: Data Access – Shellfish – Biological Data – Crab Observer – 
-  #                                    Reports & Info - 
+#                                    Reports & Info - 
 #    
 #  Fish ticket data is from Ben Daly - need to ask him where this is stored.
 
-#  This is for one species - SMBKC St.Matts Blue King Crab. 
+#  This is for one species - 
 #  Look at all open fishery in that year  - here current year 2018. Should only show up in 
 #                                             snow, tanner, and directed fisheries/
+
+# pot summary ---------
 # Species Composition Reports - Sample pot summary - Fishery: QO16/ - Species: SM blue king crab
 #         Fishery will change - look at all those in current year but species will always be the same - species of interest
+# example: 
 files_pots <- dir(paste0('data/', cur_yr, '/', stock,'/potsum'), pattern = '*.csv')
 sampled_pots <- files_pots %>% 
                   map(function(x) read_csv(file.path(paste0('data/', cur_yr, '/', stock,'/potsum'), x))) %>% 
                   reduce(rbind) 
-# From Ben D, need to figure out where this comes from **fix**
-# each fishery has a tab here, read in all applicable fisheries
-#fish_tkt <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QO16', startRow = 3, 
-#                      endRow = 53)
-#fish_tkt2 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'QT17', startRow = 3, 
-#                       endRow = 53) # edit start and end rows.
-#fish_tkt3 <- read.xlsx("data/FishTicketsummaries 2016-17.xlsx", sheetName = 'TR17', startRow = 3, 
-#                   endRow = 53) # edit start and end rows.
 
-#fish_tkt1 %>% 
-#  rbind(fish_tkt2) %>% 
-#  rbind(fish_tkt3)
+# Data dump --------
 # Data dumps - Crab Detail Data - Fishery: QO16 - Species: snow crab - Sex: all 
 files_cdata <- dir(paste0('data/', cur_yr, '/', stock,'/potsum'), pattern = '*.csv')
 crab_data <- files_cdata %>% 
