@@ -30,46 +30,51 @@ stock <- 'smbkc' #change with each stock of interest - stock of interest is the 
 # Species Composition Reports - Sample pot summary - Fishery: QO16/ - Species: SM blue king crab
 #         Fishery will change - look at all those in current year but species will always be the same - species of interest
 # example: 
-files_pots <- dir(paste0('data/', cur_yr, '/', stock,'/potsum'), pattern = '*.csv')
+files_pots <- dir(paste0('data/', cur_yr, '/', stock,'/potsum'), pattern = '*.csv') # creates a list with file names
 sampled_pots <- files_pots %>% 
                   map(function(x) read_csv(file.path(paste0('data/', cur_yr, '/', stock,'/potsum'), x))) %>% 
-                  reduce(rbind) 
+                  reduce(rbind) # takes those file name from above and reads all of them into 1 data frame
+head(sampled_pots) #check to make sure things were read in ok.
 
 # Data dump --------
 # Data dumps - Crab Detail Data - Fishery: QO16 - Species: snow crab - Sex: all 
-files_cdata <- dir(paste0('data/', cur_yr, '/', stock,'/potsum'), pattern = '*.csv')
+files_cdata <- dir(paste0('data/', cur_yr, '/', stock,'/datadump'), pattern = '*.csv')
 crab_data <- files_cdata %>% 
-  map(function(x) read_csv(file.path(paste0('data/', cur_yr, '/', stock,'/potsum'), x))) %>% 
-  reduce(rbind) 
+  map(function(x) read_csv(file.path(paste0('data/', cur_yr, '/', stock,'/datadump'), x))) %>% 
+  reduce(rbind) # see comments above same code just different folder/files
 
 # Data on this relationship from NMFS tech memo July 2016 - Bob Foy
-weight_length <- read.csv('data/weight_length.csv') #using these values and size results in average
-#                  weight in grams.   
+weight_length <- read.csv('data/weight_length.csv') # using these values and size results in average weight in grams.   
+# this file is created from Bob's data. 
+head(weight_length) # added fishery_code column (matches the 2 letter codes out of the wiki)
 
-# landed pounds in directed fishery SMBKC QP
+# landed pounds in directed fishery SMBKC QP - where to update this from ???? **fix**
 landed_lb <- read.xlsx("data/SMBKC/FT summary SMBKC Multiple Seasons By Stat Area With CDQ-.xlsx", 
                        sheetName = 'Sheet1', startRow = 3, endRow = 55)
 ## Fishery directed effort - Ben D. summarizes this from WBT Directed-Incidental Calculations_17-18.xlsx
-fishery_effort <- read.xlsx("data/SMBKC/SMBKC_bycatch_ests.xlsx", 
-                       sheetName = 'Sheet1')
+# where to update this from ???? **fix**
+fishery_effort <- read_excel("data/SMBKC/SMBKC_bycatch_ests.xlsx", 
+                       sheet = 'Sheet1')
 
 # summary stats  ----------
 # number of pots sampled ------
 sampled_pots %>% 
-  unite(Trip-spn, Trip, Spn, sep ="-") -> pots2
+  unite(Trip_spn, Trip, Spn, sep ="-") -> pots2 # combines trip and spn to give unique ID for each row
 
 pots2 %>% 
   group_by(Fishery) %>% 
-  summarise(no_pots = length(unique(`Trip - spn`))) -> pots
+  summarise(no_pots = length(unique(`Trip_spn`))) -> pots # summarizes the number of pots observed in each fishery
 
 # count in pots ------
 # count for females, sublegal, legalret and legalNR # from potSummary
 sampled_pots %>% 
-  gather("component", "n", Female:LegalNR) -> sampled_pots2
+  gather("component", "n", Female:LegalNR) -> sampled_pots2 
+#### groups data differently for easier summarization
 
 sampled_pots2 %>% 
   group_by(Fishery, component) %>% 
-  summarise(number = sum(n)) -> numbers
+  summarise(number = sum(n)) -> numbers # summarises the numbers observed for each fishery and "component"
+                                        #   components are females, sublegal
 
 numbers %>% 
   left_join(pots) -> samp_pots
