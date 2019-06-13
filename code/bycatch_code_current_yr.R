@@ -47,10 +47,11 @@ crab_data <- files_cdata %>%
 weight_length <- read.csv('data/weight_length.csv') # using these values and size results in average weight in grams.   
 # this file is created from Bob's data. 
 head(weight_length) # added fishery_code column (matches the 2 letter codes out of the wiki)
+# head () or tail() gives you a glimpse of the beginning or end of the data frame
 
 # landed pounds in directed fishery SMBKC QP - where to update this from ???? **fix**
-landed_lb <- read.xlsx("data/SMBKC/FT summary SMBKC Multiple Seasons By Stat Area With CDQ-.xlsx", 
-                       sheetName = 'Sheet1', startRow = 3, endRow = 55)
+landed_lb <- read_excel("data/SMBKC/FT summary SMBKC Multiple Seasons By Stat Area With CDQ-.xlsx", 
+                       sheet = 'landed')
 ## Fishery directed effort - Ben D. summarizes this from WBT Directed-Incidental Calculations_17-18.xlsx
 # where to update this from ???? **fix**
 fishery_effort <- read_excel("data/SMBKC/SMBKC_bycatch_ests.xlsx", 
