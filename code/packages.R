@@ -16,6 +16,7 @@ library(pander)
 library(data.table)
 library(readr)
 library(purrr)
+library(stringr)
 options(scipen=9999) # remove scientific notation
 
 loadfonts(device="win")
