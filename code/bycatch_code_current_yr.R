@@ -70,33 +70,45 @@ pots2 %>%
 # count for females, sublegal, legalret and legalNR # from potSummary
 sampled_pots %>% 
   gather("component", "n", Female:LegalNR) -> sampled_pots2 
+
 #### groups data differently for easier summarization
 
 sampled_pots2 %>% 
   group_by(Fishery, component) %>% 
   summarise(number = sum(n)) -> numbers # summarises the numbers observed for each fishery and "component"
-                                        #   components are females, sublegal
+                                        #   components are females, sublegal, LegalNR, and LegalRet
 
 numbers %>% 
-  left_join(pots) -> samp_pots
+  left_join(pots) -> samp_pots # joins the created numbers data frame above with 'pots' which has 
+                              #     the number of pots obserbed in each fishery.
 
 # calculate CPUE from sampled pots -----------
 samp_pots %>% 
-  mutate(cpue = number/no_pots) -> samp_pots
-# pull year out from fishery designation
-library(stringr)
+  mutate(cpue = number/no_pots) -> samp_pots # mutate adds a column with the calculated value.
+head(samp_pots)
+
+# pull year out from fishery designation 
+# This is needed since the year / fishery designtation is stored as 1 variable under 'Fishery'
+#     not as important for just looking at one year but will be helpful to have these seperate when
+#     we start combining year. 
+
+## FUNCTION --------
 numextract <- function(string){ 
   str_sub(string, 3, 4)
 } 
 chrextract <- function(string){ 
   str_sub(string, 1, 2)
 }
+#------------
 samp_pots %>% 
   mutate(year = as.numeric(numextract(Fishery)) + 2000, 
          fishery = chrextract(Fishery), 
-         species = ifelse(fishery == "QO", "snow", 
-                    ifelse(fishery == "QT", "TannerW", 
-                     ifelse(fishery == "QP", "SMBKC")))) -> samp_pots
+         species = ifelse(fishery == "QO", "snow",
+                    ifelse(fishery == "OB", "EAG", 
+                     ifelse(fishery == "RB", "WAG",
+                      ifelse(fishery == "TR", "bbrkc",
+                      ifelse(fishery == "QT", "TannerW", 
+                       ifelse(fishery == "QP", "SMBKC", "other"))))))) -> samp_pots
 
 # total effort from fishery ---
 # stored in excel and with calcs there so needs to be edited for each area for the rows included
