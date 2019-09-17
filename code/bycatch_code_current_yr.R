@@ -56,6 +56,7 @@ landed_lb <- read_excel("data/SMBKC/FT summary SMBKC Multiple Seasons By Stat Ar
 # where to update this from ???? **fix**
 fishery_effort <- read_excel("data/SMBKC/SMBKC_bycatch_ests.xlsx", 
                        sheet = 'Sheet1')
+##**fix** need 2018 data here
 
 # summary stats  ----------
 # number of pots sampled ------
