@@ -26,3 +26,10 @@ theme_set(theme_bw(base_size=12,base_family='Times New Roman')+
                   panel.grid.minor = element_blank()))
 
 # functions ------------
+library(stringr)
+numextract <- function(string){ 
+  str_sub(string, 3, 4)
+} 
+chrextract <- function(string){ 
+  str_sub(string, 1, 2)
+}
