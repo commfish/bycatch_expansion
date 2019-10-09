@@ -6,7 +6,6 @@
 # load -----
 library(tidyverse)
 library(FNGr)
-library(xlsx)
 library(readxl)
 library(reshape2)
 library(scales)
