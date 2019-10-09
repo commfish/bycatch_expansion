@@ -1,3 +1,8 @@
+# edits and updates to code for "BBRKC_discard_estimates.R" from Tyler
+# K.Palof 
+# katie.palof@alaska.gov
+# 2019-10-9
+
 # notes----
 # Updated, more annotated, and streamlined script for BBRKC observer catch estimation based on "BBKRC discard estimates v2.0 - Ben Daly"
 # author: Tyler Jackson
@@ -5,19 +10,18 @@
 # date: 10/9/2019
 
 # load ----
-library(tidyverse)
-library(FNGr)
-theme_set(theme_sleek())
+source('./code/packages.R')
 source("./scripts/tickr2.R")
 
 # globals ----
 DM <- 0.2 #discard mortality
 
 # data ----
-obs_dump <- read_csv("data\\RKC-1990-2018_crab_dump.csv")
-potsum <- read_csv("data\\RKC-1990-2018_potsum.csv")
-ret_catch <-read_csv("data\\RKC-retained_catch.csv")
-dock <-read_csv("data\\RKC-1990-2018_dockside.csv")
+obs_dump <- read.csv("./data/bbrkc/RKC-1990-2018_crab_dump.csv") # now reads in as a data frame 
+potsum <- read.csv("./data/bbrkc/RKC-1990-2018_potsum.csv")
+ret_catch <-read.csv("./data/bbrkc/RKC-retained_catch.csv")
+dock <-read.csv("./data/bbrkc/RKC-1990-2018_dockside.csv")
+metadata <- read.csv("./data/metadata.csv")
 
 # data cleaning and parsing ----
 
