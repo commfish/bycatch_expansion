@@ -2,8 +2,18 @@
 bycatch expansion calculations for BSAI
 
 Project structure:
+This project needs a data folder and a results folder in place.
+
 Data files are stored in data folder in the project
 code files are stored in a code folder in the project
+
+
+
+
+
+
+
+
 
 Ben's e-mail had 4 items to send to authors:
 
@@ -24,6 +34,8 @@ Item 2: length (size) frequencies by shell condition for:
 Input Data:
 weight_length.csv
 contains weight length relationships from NMFS (B.Foy) in July 2016
+metadata.csv
+contain metadata from Ben on the fishery and target species codes
 key:
 rkc - red king crab
 bkc - blue king crab
