@@ -5,6 +5,7 @@
 
 # load -----
 library(tidyverse)
+library(FNGr)
 library(xlsx)
 library(readxl)
 library(reshape2)
@@ -24,6 +25,7 @@ windowsFonts(Times=windowsFont("TT Times New Roman"))
 theme_set(theme_bw(base_size=12,base_family='Times New Roman')+ 
             theme(panel.grid.major = element_blank(),
                   panel.grid.minor = element_blank()))
+theme_set(theme_sleek())
 
 # functions ------------
 library(stringr)
