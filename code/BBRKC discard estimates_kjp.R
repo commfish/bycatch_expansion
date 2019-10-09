@@ -101,4 +101,19 @@ potsum2 %>%
   select(1,2,8,3,9,4,10,5,11,6,12) %>%
   add_row(year = 1994:1995, .before = 4) -> obs_cpue
 
+# dockside sampling data, add year and fishery
+dock %>%
+  mutate(year = as.numeric(substring(fishery, 3, 4)),
+         year = ifelse(year <= 75, year + 2000, year + 1900),
+         target = substring(fishery, 2, 2), 
+         fishery_type = substring(fishery, 1, 1)) %>% 
+  left_join(metadata) %>% 
+  left_join(metadata2) %>% 
+  mutate(dir_cr = case_when(fishery_type == "X" ~ "CR",
+                            fishery_type == "Q" ~ "NA", 
+                            fishery_type %in% c("C", "E", "T") ~ "directed"),
+         shell_text = case_when(shell %in% c(0:2, 9) ~ "New",
+                                shell %in% c(3:5) ~ "Old")) -> dock
+
+
 
