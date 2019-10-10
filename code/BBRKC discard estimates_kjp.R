@@ -114,6 +114,33 @@ dock %>%
                             fishery_type %in% c("C", "E", "T") ~ "directed"),
          shell_text = case_when(shell %in% c(0:2, 9) ~ "New",
                                 shell %in% c(3:5) ~ "Old")) -> dock
+# output summary tables ----
 
+# summarize retained catch and join to observer cpue data
+ret_catch %>%
+  group_by(year) %>%
+  summarise(ret_cat_lb = sum(ret_cat_lb, na.rm = T), 
+            ret_cat_crabs = sum(ret_cat_crabs, na.rm = T),
+            fishing_effort = sum(effort, na.rm = T)) %>%
+  as.data.frame() %>%
+  left_join(obs_cpue, by="year") -> obs_cpue
 
+write.csv(obs_cpue, "./output/BBRKC_observer_cpue_1990_2018.csv", row.names = F)
 
+# discard estimates using subtraction method
+obs_cpue %>%
+  left_join(mean_wt, by="year") %>%
+  mutate(male_tot_catch_wt_lb = obs_male_cpue * fishing_effort * male_wt,
+         legal_male_tot_catch_wt_lb = obs_legal_male_cpue * fishing_effort * legal_male_wt,
+         male_discard_wt_lb = male_tot_catch_wt_lb - ret_cat_lb,
+         legal_male_discard_wt_lb = legal_male_tot_catch_wt_lb - ret_cat_lb,
+         female_discard_wt_lb = obs_fem_cpue * fishing_effort * female_wt,
+         male_dm_wt_lb = male_discard_wt_lb * DM,
+         female_dm_wt_lb = female_discard_wt_lb * DM,
+         tot_dm_wt_lb = male_dm_wt_lb + female_dm_wt_lb,
+         tot_dm_wt_mil_lb = tot_dm_wt_lb / 1000000,
+         dm_rate = tot_dm_wt_lb / ret_cat_lb,
+         legal_male_discard_rate = legal_male_discard_wt_lb / legal_male_tot_catch_wt_lb) %>%
+  select(1, 20:30) -> sub_discard_est
+
+write.csv(sub_discard_est, "./output/BBRKC_subtraction_discard_esimates_1990_2018.csv", row.names=F)
