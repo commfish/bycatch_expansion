@@ -7,6 +7,7 @@
 
 # load -------
 source('./code/packages.R')
+source("./code/tickr2.R")
 
 # globals ----
 DM <- 0.2 #discard mortality
@@ -172,13 +173,13 @@ sub_discard_est %>%
               mutate(Method = "LNR")) %>%
   mutate(Rationalized = case_when(year < 2005 ~ F,
                                   year >= 2005 ~ T)) %>%
-  ggplot(aes(x = year, y = dm_rate, color = Rationalized))+
-  geom_point()+ 
-  geom_line(aes(linetype = factor(Method, levels = c("Subtraction", "LNR"))))+
-  scale_color_manual(values = c("blue", "red"), guide=F)+
-  scale_y_continuous(limits = c(-0.01,0.5))+
+  ggplot(aes(x = year, y = dm_rate, color = Rationalized)) +
+  geom_point() + 
+  geom_line(aes(linetype = Method)) +
+  scale_color_manual(values = c("blue", "red"), guide=F) +
+  scale_y_continuous(limits = c(-0.01,0.5)) +
   scale_x_continuous(breaks=tickr2(data=sub_discard_est, var="year", by=1, labs=2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
-  labs(x = NULL, y = "lb bycatch mortality per lb retained catch", linetype = "Estimation Method")+
+  labs(x = NULL, y = "lb bycatch mortality per lb retained catch", linetype = "Estimation Method") +
   theme(legend.justification=c(1,1), legend.position = c(1,1)) -> dm_rate_year
 
 png('./figures/BBRKC_dm_rate_year_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
@@ -195,9 +196,9 @@ sub_discard_est %>%
   mutate(Rationalized = case_when(year < 2005 ~ F,
                                   year >= 2005 ~ T)) %>%
   ggplot(aes(x = year, y = tot_dm_wt_mil_lb, color = Rationalized))+
-  geom_point()+ 
-  geom_line(aes(linetype = factor(Method, levels = c("Subtraction", "LNR"))))+
-  scale_color_manual(values = c("blue", "red"), guide=F)+
+  geom_point() + 
+  geom_line(aes(linetype = Method)) +
+  scale_color_manual(values = c("blue", "red"), guide=F) +
   scale_x_continuous(breaks=tickr2(data=sub_discard_est, var="year", by=1, labs=2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
   labs(x = NULL, y = "Discard mortality (million lb)", linetype = "Estimation Method")+
   theme(legend.justification=c(1,1), legend.position = c(1,1)) -> dm_mil_lb_year
