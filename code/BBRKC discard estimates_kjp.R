@@ -144,3 +144,148 @@ obs_cpue %>%
   select(1, 20:30) -> sub_discard_est
 
 write.csv(sub_discard_est, "./output/BBRKC_subtraction_discard_esimates_1990_2018.csv", row.names=F)
+
+# compute legal nt reatined discards
+obs_cpue %>%
+  left_join(mean_wt, by="year") %>%
+  mutate(sublegal_male_catch_wt_lb = obs_sublegal_male_cpue * fishing_effort * sublegal_male_wt,
+         lnr_male_catch_wt_lb = obs_lnr_male_cpue * fishing_effort * lnr_male_wt, 
+         male_not_retained_tot_catch_wt_lb = sublegal_male_catch_wt_lb + lnr_male_catch_wt_lb,
+         female_tot_catch_wt_lb = obs_fem_cpue * fishing_effort * female_wt,
+         tot_discard_wt_lb = male_not_retained_tot_catch_wt_lb + female_tot_catch_wt_lb,
+         tot_dm_wt_lb = tot_discard_wt_lb * DM,
+         tot_dm_wt_mil_lb =  tot_dm_wt_lb / 1000000,
+         dm_rate = tot_dm_wt_lb / ret_cat_lb) %>%
+  select(1:4, 20:27) %>%
+  filter(year < 2018) -> lnr_discard_estimates
+
+write.csv(lnr_discard_estimates, "./output/BBRKC_legal_not_retained_discard_estimates_1990_2017.csv", row.names = F)
+
+# figures ----    
+
+# Discard Mortality Rate by Year 
+sub_discard_est %>%
+  select(year, dm_rate) %>%
+  mutate(Method = "Subtraction") %>%
+  bind_rows(lnr_discard_estimates %>%
+              select(year, dm_rate) %>%
+              mutate(Method = "LNR")) %>%
+  mutate(Rationalized = case_when(year < 2005 ~ F,
+                                  year >= 2005 ~ T)) %>%
+  ggplot(aes(x = year, y = dm_rate, color = Rationalized))+
+  geom_point()+ 
+  geom_line(aes(linetype = factor(Method, levels = c("Subtraction", "LNR"))))+
+  scale_color_manual(values = c("blue", "red"), guide=F)+
+  scale_y_continuous(limits = c(-0.01,0.5))+
+  scale_x_continuous(breaks=tickr2(data=sub_discard_est, var="year", by=1, labs=2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
+  labs(x = NULL, y = "lb bycatch mortality per lb retained catch", linetype = "Estimation Method")+
+  theme(legend.justification=c(1,1), legend.position = c(1,1)) -> dm_rate_year
+
+png('./figures/BBRKC_dm_rate_year_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
+dm_rate_year
+dev.off()
+
+# Discard mortality by year 
+sub_discard_est %>%
+  select(year, tot_dm_wt_mil_lb ) %>%
+  mutate(Method = "Subtraction") %>%
+  bind_rows(lnr_discard_estimates %>%
+              select(year, tot_dm_wt_mil_lb) %>%
+              mutate(Method = "LNR")) %>%
+  mutate(Rationalized = case_when(year < 2005 ~ F,
+                                  year >= 2005 ~ T)) %>%
+  ggplot(aes(x = year, y = tot_dm_wt_mil_lb, color = Rationalized))+
+  geom_point()+ 
+  geom_line(aes(linetype = factor(Method, levels = c("Subtraction", "LNR"))))+
+  scale_color_manual(values = c("blue", "red"), guide=F)+
+  scale_x_continuous(breaks=tickr2(data=sub_discard_est, var="year", by=1, labs=2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
+  labs(x = NULL, y = "Discard mortality (million lb)", linetype = "Estimation Method")+
+  theme(legend.justification=c(1,1), legend.position = c(1,1)) -> dm_mil_lb_year
+
+png('./figures/BBRKC_dm_mil_lb_year_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
+dm_mil_lb_year
+dev.off()
+
+# Legal Discard Rate
+sub_discard_est %>%
+  mutate(Rationalized = case_when(year < 2005 ~ F,
+                                  year >= 2005 ~ T)) %>%
+  ggplot(aes(x = year, y = legal_male_discard_rate, color = Rationalized))+
+  geom_point()+ 
+  geom_line()+
+  geom_hline(yintercept = 0, size=0.4)+
+  scale_color_manual(values = c("blue", "red"), guide=F)+
+  scale_x_continuous(breaks=tickr2(data=sub_discard_est, "year", 1, 2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
+  scale_y_continuous(breaks=seq(-1, 1, 0.2), limits = c(-0.5, 0.5))+
+  labs(x = NULL, y = "lbs legal discards / lbs legal catch") -> legal_discard_rate_subtraction
+
+png('./figures/BBRKC_legal_discard_rate_lb_year_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
+legal_discard_rate_subtraction
+dev.off()
+
+# Proportion males that are sublegal
+obs_cpue %>%
+  ggplot(aes(x = year, y = obs_num_sublegal_male / obs_num_male))+
+  geom_point()+
+  geom_line()+
+  labs(x=NULL, y = "Proportion sublegal in total males")+
+  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels)+
+  scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0,1)) -> prop_sublegal_male
+
+png('./figures/BBRKC_sublegal_male_proportion_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
+prop_sublegal_male
+dev.off()
+
+# Proportion legal old shell in all legal males
+(obs_dump %>%
+    filter(sex == 1 & legal == 1 & shell != -9) %>%
+    mutate(Shell_text = case_when(shell %in% c(0:2, 9) ~ "New",
+                                  shell %in% c(3:5) ~ "Old")) %>%
+    group_by(year) %>%
+    mutate(tot_legal_male = n()) %>%
+    group_by(year, Shell_text) %>%
+    summarize(count = n(),
+              tot_legal_male = mean(tot_legal_male)) %>%
+    ungroup() %>%
+    filter(Shell_text == "Old") %>%
+    add_row(year = 1994:1995) -> obs_old_shell_prop) %>%
+  ggplot(aes(x = year, y = count[Shell_text == "Old"] / tot_legal_male))+
+  geom_point()+
+  geom_line()+
+  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels)+
+  scale_y_continuous(breaks = seq(0, 0.5, 0.1), limits = c(0, 0.5))+
+  labs(x = NULL, y = "Proportion old shell in legal males") -> prop_OS_male
+
+png('./figures/BBRKC_oldshell_male_proportion_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
+prop_OS_male
+dev.off() 
+
+# dockside vs fishery proportion old shell male
+dock %>%
+  group_by(year) %>%
+  mutate(total = sum(numcrab)) %>%
+  group_by(year, Shell_text) %>%
+  summarize(count = sum(numcrab),
+            total = mean(total)) %>%
+  ungroup() %>%
+  filter(Shell_text == "Old") %>%
+  add_row(year = 1994:1995) %>%
+  left_join(obs_old_shell_prop, c("year", "Shell_text")) %>%
+  unite("Dockside", count.x, total) %>%
+  unite("Observer", count.y, tot_legal_male) %>%
+  gather("Source","value", c(3, 4)) %>%
+  separate(value, c("count", "total")) %>%
+  mutate_at(4:5, as.numeric) %>%
+  mutate(Source = factor(Source, levels = c("Observer", "Dockside"))) %>%
+  ggplot(aes(x = year, y = count / total, linetype=Source))+
+  geom_point()+
+  geom_line()+
+  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels)+
+  scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1))+
+  labs(x = NULL, y = "Proportion old shell", linetype=NULL)+
+  theme(legend.justification=c(1,1), legend.position = c(1,1)) -> prop_OS_dock_obs
+
+png('./figures/BBRKC_oldshell_male_proportion_1990_2018 _dock&obs.png', width = 6, height = 4, units = "in", res = 300) 
+prop_OS_dock_obs
+dev.off() 
+
