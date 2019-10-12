@@ -11,6 +11,9 @@ source("./code/tickr2.R")
 
 # globals ----
 DM <- 0.2 #discard mortality
+Tspecies <- "red king crab" # target species, makes code more interchangable
+Tfish <- "bbrkc" # file name saves controlled here
+
 
 # data -----
 # specifics on where this data comes from  **FIX**
@@ -25,7 +28,7 @@ weight_length <- read.csv('./data/weight_length.csv') #using these values and si
 
 # data clean-up ---------
 weight_length %>% 
-  filter(species == "red king crab", 
+  filter(species == Tspecies, 
          component %in% c("LegalRet", "Female", "Immature_F")) %>% 
   mutate(component = case_when(sex == 1 ~ "male", 
                                clutch == -9 ~ "immatureF",
@@ -51,7 +54,7 @@ obs_dump %>%
   mutate(wt_kg = (alpha * size^beta) / 1000, 
          wt_lb = wt_kg * 2.20462262) %>% 
   filter(dir_cr != "NA",
-         species == "red king crab",
+         species == Tspecies,
          sex %in% c(1, 2)) -> obs_dump2
 
 # create mean weight data frame, add years with fishery closures
@@ -82,7 +85,7 @@ potsum %>%
                             fishery_type %in% c("C", "E", "T") ~ "directed"), 
          tot_male = sublegal + tot_legal) %>% 
   filter(dir_cr != "NA",
-         species == "red king crab") -> potsum2
+         species == Tspecies) -> potsum2
 
 # create observer cpue data frame, add years with fishery closures
 potsum2 %>%
@@ -126,7 +129,7 @@ ret_catch %>%
   as.data.frame() %>%
   left_join(obs_cpue, by="year") -> obs_cpue
 
-write.csv(obs_cpue, "./output/BBRKC_observer_cpue_1990_2018.csv", row.names = F)
+write.csv(obs_cpue, paste0("./output/", Tfish ,"_observer_cpue_1990_2018.csv"), row.names = F)
 
 # discard estimates using subtraction method
 obs_cpue %>%
@@ -144,7 +147,7 @@ obs_cpue %>%
          legal_male_discard_rate = legal_male_discard_wt_lb / legal_male_tot_catch_wt_lb) %>%
   select(1, 20:30) -> sub_discard_est
 
-write.csv(sub_discard_est, "./output/BBRKC_subtraction_discard_esimates_1990_2018.csv", row.names=F)
+write.csv(sub_discard_est, paste0("./output/", Tfish,"_subtraction_discard_esimates_1990_2018.csv"), row.names=F)
 
 # compute legal nt reatined discards
 obs_cpue %>%
@@ -160,7 +163,7 @@ obs_cpue %>%
   select(1:4, 20:27) %>%
   filter(year < 2018) -> lnr_discard_estimates
 
-write.csv(lnr_discard_estimates, "./output/BBRKC_legal_not_retained_discard_estimates_1990_2017.csv", row.names = F)
+write.csv(lnr_discard_estimates, paste0("./output/", Tfish, "_legal_not_retained_discard_estimates_1990_2017.csv"), row.names = F)
 
 # figures ----    
 
