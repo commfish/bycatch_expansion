@@ -227,10 +227,10 @@ dev.off()
 # Proportion males that are sublegal
 obs_cpue %>%
   ggplot(aes(x = year, y = obs_num_sublegal_male / obs_num_male))+
-  geom_point()+
-  geom_line()+
-  labs(x=NULL, y = "Proportion sublegal in total males")+
-  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels)+
+  geom_point() +
+  geom_line() +
+  labs(x=NULL, y = "Proportion sublegal in total males") +
+  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels) +
   scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0,1)) -> prop_sublegal_male
 
 png('./figures/BBRKC_sublegal_male_proportion_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
@@ -238,23 +238,23 @@ prop_sublegal_male
 dev.off()
 
 # Proportion legal old shell in all legal males
-(obs_dump %>%
+(obs_dump2 %>%
     filter(sex == 1 & legal == 1 & shell != -9) %>%
-    mutate(Shell_text = case_when(shell %in% c(0:2, 9) ~ "New",
+    mutate(shell_text = case_when(shell %in% c(0:2, 9) ~ "New",
                                   shell %in% c(3:5) ~ "Old")) %>%
     group_by(year) %>%
     mutate(tot_legal_male = n()) %>%
-    group_by(year, Shell_text) %>%
+    group_by(year, shell_text) %>%
     summarize(count = n(),
               tot_legal_male = mean(tot_legal_male)) %>%
-    ungroup() %>%
-    filter(Shell_text == "Old") %>%
+    as.data.frame() %>% 
+    filter(shell_text == "Old") %>%
     add_row(year = 1994:1995) -> obs_old_shell_prop) %>%
-  ggplot(aes(x = year, y = count[Shell_text == "Old"] / tot_legal_male))+
-  geom_point()+
-  geom_line()+
-  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels)+
-  scale_y_continuous(breaks = seq(0, 0.5, 0.1), limits = c(0, 0.5))+
+  ggplot(aes(x = year, y = count[shell_text == "Old"] / tot_legal_male)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels) +
+  scale_y_continuous(breaks = seq(0, 0.5, 0.1), limits = c(0, 0.5)) +
   labs(x = NULL, y = "Proportion old shell in legal males") -> prop_OS_male
 
 png('./figures/BBRKC_oldshell_male_proportion_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
@@ -265,25 +265,25 @@ dev.off()
 dock %>%
   group_by(year) %>%
   mutate(total = sum(numcrab)) %>%
-  group_by(year, Shell_text) %>%
+  group_by(year, shell_text) %>%
   summarize(count = sum(numcrab),
             total = mean(total)) %>%
-  ungroup() %>%
-  filter(Shell_text == "Old") %>%
+  as.data.frame() %>%
+  filter(shell_text == "Old") %>%
   add_row(year = 1994:1995) %>%
-  left_join(obs_old_shell_prop, c("year", "Shell_text")) %>%
+  left_join(obs_old_shell_prop, c("year", "shell_text")) %>%
   unite("Dockside", count.x, total) %>%
   unite("Observer", count.y, tot_legal_male) %>%
   gather("Source","value", c(3, 4)) %>%
   separate(value, c("count", "total")) %>%
   mutate_at(4:5, as.numeric) %>%
   mutate(Source = factor(Source, levels = c("Observer", "Dockside"))) %>%
-  ggplot(aes(x = year, y = count / total, linetype=Source))+
-  geom_point()+
-  geom_line()+
-  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels)+
-  scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1))+
-  labs(x = NULL, y = "Proportion old shell", linetype=NULL)+
+  ggplot(aes(x = year, y = count / total, linetype=Source)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels) +
+  scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
+  labs(x = NULL, y = "Proportion old shell", linetype=NULL) +
   theme(legend.justification=c(1,1), legend.position = c(1,1)) -> prop_OS_dock_obs
 
 png('./figures/BBRKC_oldshell_male_proportion_1990_2018 _dock&obs.png', width = 6, height = 4, units = "in", res = 300) 
