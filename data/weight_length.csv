@@ -1,0 +1,22 @@
+species,target,component,sex,clutch,alpha,beta,description
+red king crab,R,LegalRet,1,,0.000403,3.141334,rkc males
+red king crab,R,LegalNR,1,,0.000403,3.141334,rkc males
+red king crab,R,Sublegal,1,,0.000403,3.141334,rkc males
+red king crab,R,Female,2,,0.003593,2.666076,ovigerous rkc
+red king crab,R,Immature_F,2,-9,0.000408,3.127956,non ovigerous rkc
+bkc males,,,,,0.000508,3.106409,bkc males
+blue king crab,P,LegalRet,1,,0.000502,3.107158,st matthew bkc
+blue king crab,P,LegalNR,1,,0.000502,3.107158,st matthew bkc
+blue king crab,P,Sublegal,1,,0.000502,3.107158,st matthew bkc
+blue king crab,P,Female,2,,0.02065,2.27,st matthew bkc
+bkc females,,Female,2,,0.02065,2.27,bkc females
+Tanner crab,T,LegalRet,1,,0.00027,3.022134,tc males
+Tanner crab,T,LegalNR,1,,0.00027,3.022134,tc males
+Tanner crab,T,Sublegal,1,,0.00027,3.022134,tc males
+Tanner crab,T,Female,2,,0.000441,2.898686,ovigerous tc
+Tanner crab,T,Immature_F,2,-9,0.000562,2.816928,non ovigerous tc
+snow crab,O,LegalRet,1,,0.000267,3.097253,sc males
+snow crab,O,LegalNR,1,,0.000267,3.097253,sc males
+snow crab,O,Sublegal,1,,0.000267,3.097253,sc males
+snow crab,O,Female,2,,0.001158,2.708793,ovigerous sc
+snow crab,O,Immature_F,2,-9,0.001047,2.708367,non ovigerous sc
