@@ -33,7 +33,7 @@ weight_length %>%
   mutate(component = case_when(sex == 1 ~ "male", 
                                clutch == -9 ~ "immatureF",
                                sex != 1 & is.na(clutch) ~ "female")) %>% 
-  select(species, component, sex, alpha, beta) -> rkc_wt
+  select(species, component, sex, alpha, beta) -> Tspecies_wt
   
   
 # assigns species, area fished, and weights - just directed and CR in the end
@@ -50,7 +50,7 @@ obs_dump %>%
          component = case_when(sex == 1 ~ "male", 
                                clutch == -9 ~ "immatureF",
                                sex != 1 & clutch != -9 ~ "female")) %>% 
-  left_join(rkc_wt) %>% 
+  left_join(Tspecies_wt) %>% 
   mutate(wt_kg = (alpha * size^beta) / 1000, 
          wt_lb = wt_kg * 2.20462262) %>% 
   filter(dir_cr != "NA",
