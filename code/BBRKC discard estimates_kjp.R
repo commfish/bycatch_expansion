@@ -7,13 +7,12 @@
 
 # load -------
 source('./code/packages.R')
-source("./code/tickr2.R")
 
 # globals ----
 DM <- 0.2 #discard mortality
 Tspecies <- "red king crab" # target species, makes code more interchangable
 Tfish <- "bbrkc" # file name saves controlled here
-
+fig_x_axis <- tickr(data.frame(breaks = 1990:2018), breaks, 2) # create object containing figure axis labels (ie, blank minor ticks)
 
 # data -----
 # specifics on where this data comes from  **FIX**
@@ -69,7 +68,7 @@ obs_dump2 %>%
 
 # # create fields to parse data
 # sp_fish - species
-# dir_cr - fishery area/type?
+# dir_cr - fishery area/type (directed vs test fishery)
 # year
 # tot_male - total males (sublegal and legal)
 # only retain males and females in Bristol Bay fisheries
@@ -181,7 +180,7 @@ sub_discard_est %>%
   geom_line(aes(linetype = Method)) +
   scale_color_manual(values = c("blue", "red"), guide=F) +
   scale_y_continuous(limits = c(-0.01,0.5)) +
-  scale_x_continuous(breaks=tickr2(data=sub_discard_est, var="year", by=1, labs=2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
+  scale_x_continuous(breaks = fig_x_axis$breaks, labels = fig_x_axis$labels)+
   labs(x = NULL, y = "lb bycatch mortality per lb retained catch", linetype = "Estimation Method") +
   theme(legend.justification=c(1,1), legend.position = c(1,1)) -> dm_rate_year
 
@@ -202,7 +201,7 @@ sub_discard_est %>%
   geom_point() + 
   geom_line(aes(linetype = Method)) +
   scale_color_manual(values = c("blue", "red"), guide=F) +
-  scale_x_continuous(breaks=tickr2(data=sub_discard_est, var="year", by=1, labs=2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
+  scale_x_continuous(breaks = fig_x_axis$breaks, labels = fig_x_axis$labels)+
   labs(x = NULL, y = "Discard mortality (million lb)", linetype = "Estimation Method")+
   theme(legend.justification=c(1,1), legend.position = c(1,1)) -> dm_mil_lb_year
 
@@ -219,7 +218,7 @@ sub_discard_est %>%
   geom_line()+
   geom_hline(yintercept = 0, size=0.4)+
   scale_color_manual(values = c("blue", "red"), guide=F)+
-  scale_x_continuous(breaks=tickr2(data=sub_discard_est, "year", 1, 2)$breaks, labels=tickr2(sub_discard_est, "year", 1, 2)$labels)+
+  scale_x_continuous(breaks=fig_x_axis$breaks, labels=fig_x_axis$labels)+
   scale_y_continuous(breaks=seq(-1, 1, 0.2), limits = c(-0.5, 0.5))+
   labs(x = NULL, y = "lbs legal discards / lbs legal catch") -> legal_discard_rate_subtraction
 
@@ -229,11 +228,11 @@ dev.off()
 
 # Proportion males that are sublegal
 obs_cpue %>%
-  ggplot(aes(x = year, y = obs_num_sublegal_male / obs_num_male))+
+  ggplot(aes(x = year, y = obs_num_sublegal_male / obs_num_male)) +
   geom_point() +
   geom_line() +
   labs(x=NULL, y = "Proportion sublegal in total males") +
-  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels) +
+  scale_x_continuous(breaks=fig_x_axis$breaks, labels=fig_x_axis$labels) +
   scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0,1)) -> prop_sublegal_male
 
 png('./figures/BBRKC_sublegal_male_proportion_1990_2018.png', width = 6, height = 4, units = "in", res = 300) 
@@ -256,7 +255,7 @@ dev.off()
   ggplot(aes(x = year, y = count[shell_text == "Old"] / tot_legal_male)) +
   geom_point() +
   geom_line() +
-  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels) +
+  scale_x_continuous(breaks=fig_x_axis$breaks, labels=fig_x_axis$labels) +
   scale_y_continuous(breaks = seq(0, 0.5, 0.1), limits = c(0, 0.5)) +
   labs(x = NULL, y = "Proportion old shell in legal males") -> prop_OS_male
 
@@ -275,16 +274,16 @@ dock %>%
   filter(shell_text == "Old") %>%
   add_row(year = 1994:1995) %>%
   left_join(obs_old_shell_prop, c("year", "shell_text")) %>%
-  unite("Dockside", count.x, total) %>%
-  unite("Observer", count.y, tot_legal_male) %>%
-  gather("Source","value", c(3, 4)) %>%
-  separate(value, c("count", "total")) %>%
-  mutate_at(4:5, as.numeric) %>%
+  rename(count_Dockside = count.x,
+         count_Observer = count.y, 
+         total_Dockside = total, 
+         total_Observer = tot_legal_male) %>%
+  pivot_longer(c(- year, -shell_text), names_to = c(".value", "Source"), names_sep = "_") %>%
   mutate(Source = factor(Source, levels = c("Observer", "Dockside"))) %>%
   ggplot(aes(x = year, y = count / total, linetype=Source)) +
   geom_point() +
   geom_line() +
-  scale_x_continuous(breaks = tickr2(obs_cpue, "year", 1, 2)$breaks, labels = tickr2(obs_cpue, "year", 1, 2)$labels) +
+  scale_x_continuous(breaks=fig_x_axis$breaks, labels=fig_x_axis$labels) +
   scale_y_continuous(breaks = seq(0, 1, 0.2), limits = c(0, 1)) +
   labs(x = NULL, y = "Proportion old shell", linetype=NULL) +
   theme(legend.justification=c(1,1), legend.position = c(1,1)) -> prop_OS_dock_obs
