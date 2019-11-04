@@ -34,3 +34,23 @@ numextract <- function(string){
 chrextract <- function(string){ 
   str_sub(string, 1, 2)
 }
+
+f_directed_fishery <- function(x, Tspecies) {
+  
+  # Bristol bay red king crab
+  # Include Test fishery, CDQ fisheries, Bristol Bay fisheries
+  if(Tspecies == "red king crab"){
+    x %>%
+      mutate(directed = ifelse(target == Tspecies & management_area %in% c("cdq", "cost recovery", "bristol bay"), 
+                               T, F)) -> x
+  }
+  
+  # Bering Sea snow crab
+  # Include Test fishery, CDQ fisheries, Bering Sea fisheries
+  if(Tspecies == "snow crab"){
+    x %>%
+      mutate(directed = ifelse(target == Tspecies & management_area %in% c("cdq", "cost recovery", "bering sea"), 
+                               T, F)) -> x
+  }
+  x
+}
